@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seminuevos Beltrán - Control y Gestión de Vehículos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos de Impresión para el Contrato */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #seccionContrato, #seccionContrato * {
+                visibility: visible;
+            }
+            #seccionContrato {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background: white !important;
+                color: black !important;
+                padding: 20px !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-3 md:p-6">
+
+    <div class="max-w-7xl mx-auto space-y-6 no-print">
+        
+        <!-- ENCABEZADO -->
+        <header class="bg-slate-900 text-white p-5 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-black tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-car-side text-amber-400"></i> Seminuevos Beltrán
+                </h1>
+                <p class="text-slate-400 text-xs mt-0.5">Control financiero, gastos, transporte, documentación y contratos</p>
+            </div>
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <button onclick="exportarDatos()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-download"></i> Respaldar
+                </button>
+                <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 cursor-pointer transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-upload"></i> Restaurar
+                    <input type="file" id="importFile" class="hidden" accept=".json" onchange="importarDatos(event)">
+                </label>
+            </div>
+        </header>
+
+        <!-- TARJETAS DE MÉTRICAS -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Inversión Total</p>
+                <p id="inversionTotal" class="text-lg md:text-xl font-black text-slate-800 mt-1">$0.00</p>
+                <span class="text-[10px] text-slate-400">Compras + Gastos</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ventas Totales</p>
+                <p id="ventasTotales" class="text-lg md:text-xl font-black text-blue-600 mt-1">$0.00</p>
+                <span class="text-[10px] text-slate-400">Ingreso de Vendidos</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ganancia Neta</p>
+                <p id="gananciaTotal" class="text-lg md:text-xl font-black text-emerald-600 mt-1">$0.00</p>
+                <span class="text-[10px] text-slate-400">Utilidad acumulada</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Autos en Inventario</p>
+                <p id="autosInventario" class="text-lg md:text-xl font-black text-amber-600 mt-1">0</p>
+                <span class="text-[10px] text-slate-400">Disponibles en piso</span>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 col-span-2 md:col-span-1">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Promedio Días / Venta</p>
+                <p id="promedioDias" class="text-lg md:text-xl font-black text-indigo-600 mt-1">0 días</p>
+                <span class="text-[10px] text-slate-400">Tiempo de rotación</span>
+            </div>
+        </div>
+
+        <!-- FORMULARIO DE REGISTRO -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-square-plus text-amber-500"></i> Registrar Nuevo Vehículo
+            </h2>
+            <form id="carForm" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                <div>
+                    <label class="font-bold text-slate-700">Auto (Marca, Modelo, Año)*</label>
+                    <input type="text" id="nombreAuto" required placeholder="Ej. Nissan Versa 2019" class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-700">VIN / Número de Serie*</label>
+                    <input type="text" id="vinAuto" required placeholder="Ej. 3FA6P8CF5..." class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-slate-900 outline-none uppercase">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-700">Precio de Compra ($)*</label>
+                    <input type="number" id="precioCompra" required placeholder="140000" class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-700">Fecha de Compra*</label>
+                    <input type="date" id="fechaCompra" required class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-700">Vendedor / Proveedor (Nombre completo)</label>
+                    <input type="text" id="vendedorInfo" placeholder="Ej. Juan Pérez López" class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="font-bold text-slate-700">URL Imagen del Auto (Opcional)</label>
+                    <input type="url" id="imagenAuto" placeholder="https://ejemplo.com/foto.jpg" class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-slate-900 outline-none">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-4 rounded-lg transition shadow">
+                        + Registrar Auto
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- FILTROS Y BÚSQUEDA -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="relative w-full md:w-72">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                <input type="text" id="searchInput" oninput="render()" placeholder="Buscar por auto, VIN o personas..." class="w-full pl-8 pr-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-slate-900">
+            </div>
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <button onclick="filtrarEstado('Todos')" id="btnEstadoTodos" class="px-3 py-1 text-xs font-bold rounded-lg border bg-slate-900 text-white border-slate-900">Todos</button>
+                <button onclick="filtrarEstado('Disponible')" id="btnEstadoDisponible" class="px-3 py-1 text-xs font-bold rounded-lg border bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Disponibles</button>
+                <button onclick="filtrarEstado('Vendido')" id="btnEstadoVendido" class="px-3 py-1 text-xs font-bold rounded-lg border bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Vendidos</button>
+                <select id="sortSelect" onchange="render()" class="text-xs p-1.5 border rounded-lg outline-none font-medium text-slate-600">
+                    <option value="reciente">Más Reciente</option>
+                    <option value="masDias">Mayor Tiempo en Piso</option>
+                    <option value="mayorInversion">Mayor Inversión</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- LISTADO DE VEHÍCULOS -->
+        <div id="listaAutos" class="space-y-4"></div>
+
+    </div>
+
+    <!-- MODAL DE VISTA PREVIA DEL CONTRATO (IMPRIMIBLE) -->
+    <div id="modalContrato" class="fixed inset-0 bg-slate-900/80 hidden z-50 overflow-y-auto p-4 flex justify-center items-start">
+        <div class="bg-white w-full max-w-4xl p-8 rounded-2xl shadow-2xl relative my-8">
+            <!-- Botones de Acción del Modal -->
+            <div class="no-print flex justify-between items-center mb-6 pb-4 border-b">
+                <h3 class="font-bold text-slate-800 text-lg">Vista Previa del Contrato - Seminuevos Beltrán</h3>
+                <div class="flex gap-2">
+                    <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> Imprimir / Guardar PDF
+                    </button>
+                    <button onclick="cerrarContrato()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs px-4 py-2 rounded-lg transition">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+
+            <!-- DOCUMENTO DE CONTRATO COMPRA-VENTA -->
+            <div id="seccionContrato" class="space-y-6 text-slate-900 text-sm leading-relaxed font-serif">
+                <div class="text-center border-b-2 border-slate-900 pb-4">
+                    <h2 class="text-xl font-bold uppercase tracking-wider">Seminuevos Beltrán</h2>
+                    <p class="text-xs font-sans font-bold text-slate-700 uppercase mt-1">Contrato Responsivo de Compra-Venta Vehicular</p>
+                    <p class="text-xs font-sans text-slate-600 mt-0.5">Culiacán, Sinaloa, México — Fecha: <span id="cFecha" class="font-bold underline"></span></p>
+                </div>
+
+                <p class="text-justify">
+                    En la ciudad de Culiacán, Sinaloa, se celebra el presente <strong>CONTRATO DE COMPRA-VENTA Y CARTA RESPONSIVA VEHICULAR</strong>, por conducto del establecimiento comercial <strong>"SEMINUEVOS BELTRÁN"</strong>, actuando en su carácter de intermediario/vendedor, y por otra parte 
+                    <strong id="cComprador" class="uppercase">________________________________________</strong> (en lo sucesivo denominado <strong>"EL COMPRADOR"</strong>), al tenor de las siguientes cláusulas y datos del vehículo:
+                </p>
+
+                <!-- TABLA DE DATOS DEL VEHÍCULO -->
+                <div class="border border-slate-400 rounded-lg overflow-hidden font-sans my-4">
+                    <div class="bg-slate-100 font-bold p-2 text-xs border-b border-slate-400 uppercase tracking-wide">
+                        1. Datos del Vehículo Objeto de la Venta
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 p-3 text-xs">
+                        <div><strong>Marca / Modelo / Año:</strong> <span id="cAuto"></span></div>
+                        <div><strong>Número de Serie (VIN):</strong> <span id="cVin" class="font-mono"></span></div>
+                        <div><strong>Precio Acordado:</strong> <span id="cPrecio" class="font-bold text-slate-900"></span></div>
+                        <div><strong>Estado Documental:</strong> Libre de gravamen / Facturado</div>
+                    </div>
+                </div>
+
+                <!-- CLÁUSULAS LEGALES -->
+                <div class="space-y-3 text-xs">
+                    <h4 class="font-bold font-sans uppercase">Cláusulas:</h4>
+                    <p><strong>PRIMERA. DE LA OPERACIÓN:</strong> "SEMINUEVOS BELTRÁN" comercializa el vehículo descrito en las condiciones físicas y mecánicas actuales en las que se encuentra.</p>
+                    <p><strong>SEGUNDA. IMPORTE Y PAGO:</strong> "EL COMPRADOR" entrega en este acto la cantidad total acordada de <strong id="cPrecioTexto"></strong> por concepto de compraventa definitiva del vehículo.</p>
+                    <p><strong>TERCERA. RESPONSABILIDAD Y CONSERVACIÓN:</strong> A partir de la fecha y hora de la firma y entrega de la unidad, "EL COMPRADOR" asume la absoluta responsabilidad civil, penal y de tránsito inherente al uso, manejo y propiedad del vehículo, deslindando totalmente a <strong>"SEMINUEVOS BELTRÁN"</strong> y al propietario anterior de cualquier responsabilidad posterior.</p>
+                    <p><strong>CUARTA. CONFORMIDAD:</strong> "EL COMPRADOR" manifiesta su entera satisfacción previa revisión física, legal y mecánica de la unidad automotriz.</p>
+                </div>
+
+                <!-- SECCIÓN DE FIRMAS -->
+                <div class="grid grid-cols-2 gap-12 pt-16 font-sans text-xs text-center">
+                    <div class="border-t border-slate-900 pt-2">
+                        <p class="font-bold uppercase">Seminuevos Beltrán</p>
+                        <p class="text-slate-500">"POR EL NEGOCIO / VENDEDOR"</p>
+                        <p class="text-[10px] text-slate-400 mt-4">Firma y Sello</p>
+                    </div>
+                    <div class="border-t border-slate-900 pt-2">
+                        <p class="font-bold uppercase" id="firmComprador">_______________________________</p>
+                        <p class="text-slate-500">"EL COMPRADOR"</p>
+                        <p class="text-[10px] text-slate-400 mt-4">Firma y Huella</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fechaCompra').value = new Date().toISOString().split('T')[0];
+
+        let autos = JSON.parse(localStorage.getItem('autos_db')) || [];
+        let estadoFiltroActual = 'Todos';
+
+        function guardarDatos() {
+            localStorage.setItem('autos_db', JSON.stringify(autos));
+            render();
+        }
+
+        // REGISTRO DE AUTO
+        document.getElementById('carForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nuevoAuto = {
+                id: Date.now(),
+                nombre: document.getElementById('nombreAuto').value.trim(),
+                vin: document.getElementById('vinAuto').value.trim().toUpperCase(),
+                precioCompra: parseFloat(document.getElementById('precioCompra').value) || 0,
+                fechaCompra: document.getElementById('fechaCompra').value,
+                vendedorInfo: document.getElementById('vendedorInfo').value.trim() || 'Seminuevos Beltrán',
+                imagen: document.getElementById('imagenAuto').value.trim(),
+                precioVenta: 0,
+                fechaVenta: '',
+                compradorInfo: '',
+                estado: 'Disponible',
+                gastos: [],
+                docs: { factura: false, tenencias: false, multas: false, bajaPlacas: false }
+            };
+            autos.push(nuevoAuto);
+            document.getElementById('carForm').reset();
+            document.getElementById('fechaCompra').value = new Date().toISOString().split('T')[0];
+            guardarDatos();
+        });
+
+        function agregarGasto(autoId) {
+            const concepto = prompt("Concepto del gasto (Ej. Traslado, Detallado, Mecánico):");
+            if (!concepto) return;
+            const monto = parseFloat(prompt("Monto del gasto ($):"));
+            if (isNaN(monto) || monto <= 0) return;
+
+            const auto = autos.find(a => a.id === autoId);
+            auto.gastos.push({ concepto, monto });
+            guardarDatos();
+        }
+
+        function eliminarGasto(autoId, gastoIndex) {
+            const auto = autos.find(a => a.id === autoId);
+            auto.gastos.splice(gastoIndex, 1);
+            guardarDatos();
+        }
+
+        function toggleDoc(autoId, docKey) {
+            const auto = autos.find(a => a.id === autoId);
+            auto.docs[docKey] = !auto.docs[docKey];
+            guardarDatos();
+        }
+
+        function registrarVenta(autoId) {
+            const auto = autos.find(a => a.id === autoId);
+            const precio = parseFloat(prompt(`Precio final de venta para ${auto.nombre} ($):`, auto.precioVenta || ''));
+            if (isNaN(precio) || precio <= 0) return;
+
+            const comprador = prompt("Nombre completo del Comprador:", auto.compradorInfo || '');
+
+            auto.precioVenta = precio;
+            auto.compradorInfo = comprador ? comprador.trim() : '';
+            auto.fechaVenta = new Date().toISOString().split('T')[0];
+            auto.estado = 'Vendido';
+            guardarDatos();
+        }
+
+        function marcarDisponible(autoId) {
+            const auto = autos.find(a => a.id === autoId);
+            auto.estado = 'Disponible';
+            auto.fechaVenta = '';
+            guardarDatos();
+        }
+
+        function eliminarAuto(autoId) {
+            if (confirm("¿Estás seguro de eliminar este auto y su historial?")) {
+                autos = autos.filter(a => a.id !== autoId);
+                guardarDatos();
+            }
+        }
+
+        // GENERADOR DE CONTRATO RESPONSIVO
+        function generarContrato(autoId) {
+            const auto = autos.find(a => a.id === autoId);
+            if (!auto) return;
+
+            const fechaHoy = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+            const precioMostrar = auto.estado === 'Vendido' ? auto.precioVenta : auto.precioCompra;
+
+            document.getElementById('cFecha').textContent = fechaHoy;
+            document.getElementById('cComprador').textContent = auto.compradorInfo || '________________________________________';
+            document.getElementById('cAuto').textContent = auto.nombre;
+            document.getElementById('cVin').textContent = auto.vin || 'N/A';
+            document.getElementById('cPrecio').textContent = `$${precioMostrar.toLocaleString('es-MX', {minimumFractionDigits: 2})} MXN`;
+            document.getElementById('cPrecioTexto').textContent = `$${precioMostrar.toLocaleString('es-MX', {minimumFractionDigits: 2})} MXN`;
+
+            document.getElementById('firmComprador').textContent = auto.compradorInfo || '_______________________________';
+
+            document.getElementById('modalContrato').classList.remove('hidden');
+        }
+
+        function cerrarContrato() {
+            document.getElementById('modalContrato').classList.add('hidden');
+        }
+
+        function filtrarEstado(estado) {
+            estadoFiltroActual = estado;
+            ['Todos', 'Disponible', 'Vendido'].forEach(e => {
+                const btn = document.getElementById(`btnEstado${e}`);
+                btn.className = e === estado 
+                    ? "px-3 py-1 text-xs font-bold rounded-lg border bg-slate-900 text-white border-slate-900"
+                    : "px-3 py-1 text-xs font-bold rounded-lg border bg-white text-slate-600 border-slate-200 hover:bg-slate-50";
+            });
+            render();
+        }
+
+        function calcularDiasPiso(fechaCompra, fechaVenta, estado) {
+            if (!fechaCompra) return 0;
+            const inicio = new Date(fechaCompra);
+            const fin = estado === 'Vendido' && fechaVenta ? new Date(fechaVenta) : new Date();
+            const dias = Math.floor((fin - inicio) / (1000 * 60 * 60 * 24));
+            return dias < 0 ? 0 : dias;
+        }
+
+        function exportarDatos() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(autos, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `seminuevos_beltran_respaldo_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importarDatos(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                try {
+                    const parsedData = JSON.parse(e.target.result);
+                    if (Array.isArray(parsedData)) {
+                        autos = parsedData;
+                        guardarDatos();
+                        alert("¡Datos cargados exitosamente en Seminuevos Beltrán!");
+                    }
+                } catch (err) { alert("Archivo no válido."); }
+            };
+            fileReader.readAsText(event.target.files[0]);
+        }
+
+        function render() {
+            const lista = document.getElementById('listaAutos');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const sortVal = document.getElementById('sortSelect').value;
+            lista.innerHTML = '';
+
+            let invTotal = 0, venTotal = 0, ganTotal = 0, disponiblesCount = 0, sumaDiasVendidos = 0, totalVendidosCount = 0;
+
+            let autosFiltrados = autos.filter(auto => {
+                const coincideEstado = estadoFiltroActual === 'Todos' || auto.estado === estadoFiltroActual;
+                const coincideBusqueda = auto.nombre.toLowerCase().includes(searchVal) || 
+                    (auto.vin && auto.vin.toLowerCase().includes(searchVal)) ||
+                    (auto.vendedorInfo && auto.vendedorInfo.toLowerCase().includes(searchVal));
+                return coincideEstado && coincideBusqueda;
+            });
+
+            autosFiltrados.sort((a, b) => {
+                if (sortVal === 'reciente') return b.id - a.id;
+                if (sortVal === 'masDias') return calcularDiasPiso(b.fechaCompra, b.fechaVenta, b.estado) - calcularDiasPiso(a.fechaCompra, a.fechaVenta, a.estado);
+                if (sortVal === 'mayorInversion') return (b.precioCompra + b.gastos.reduce((s, g) => s + g.monto, 0)) - (a.precioCompra + a.gastos.reduce((s, g) => s + g.monto, 0));
+            });
+
+            autos.forEach(auto => {
+                const totalGastos = auto.gastos.reduce((sum, g) => sum + g.monto, 0);
+                const costoTotal = auto.precioCompra + totalGastos;
+                invTotal += costoTotal;
+
+                if (auto.estado === 'Vendido') {
+                    venTotal += auto.precioVenta;
+                    ganTotal += (auto.precioVenta - costoTotal);
+                    sumaDiasVendidos += calcularDiasPiso(auto.fechaCompra, auto.fechaVenta, auto.estado);
+                    totalVendidosCount++;
+                } else {
+                    disponiblesCount++;
+                }
+            });
+
+            if (autosFiltrados.length === 0) {
+                lista.innerHTML = `
+                    <div class="bg-white p-8 rounded-2xl text-center border border-slate-200 text-slate-400">
+                        <i class="fa-solid fa-car text-3xl mb-2"></i>
+                        <p class="text-xs">No hay vehículos registrados o encontrados.</p>
+                    </div>
+                `;
+            }
+
+            autosFiltrados.forEach(auto => {
+                const totalGastos = auto.gastos.reduce((sum, g) => sum + g.monto, 0);
+                const costoTotal = auto.precioCompra + totalGastos;
+                const ganancia = auto.estado === 'Vendido' ? auto.precioVenta - costoTotal : 0;
+                const diasEnPiso = calcularDiasPiso(auto.fechaCompra, auto.fechaVenta, auto.estado);
+                const alertaTiempo = auto.estado === 'Disponible' && diasEnPiso >= 60;
+
+                const card = document.createElement('div');
+                card.className = `bg-white p-5 rounded-2xl shadow-sm border ${alertaTiempo ? 'border-rose-400 ring-1 ring-rose-200' : 'border-slate-200'} flex flex-col md:flex-row gap-5`;
+
+                card.innerHTML = `
+                    <div class="w-full md:w-44 h-36 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-slate-200 relative">
+                        ${auto.imagen 
+                            ? `<img src="${auto.imagen}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src=''; this.parentNode.innerHTML='<i class=\'fa-solid fa-car text-4xl text-slate-300\'></i>';">`
+                            : `<i class="fa-solid fa-car text-4xl text-slate-300"></i>`
+                        }
+                        <span class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded-full ${auto.estado === 'Vendido' ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-slate-900'}">
+                            ${auto.estado}
+                        </span>
+                    </div>
+
+                    <div class="flex-1 space-y-3">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                                    ${auto.nombre}
+                                    ${alertaTiempo ? '<span class="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold animate-pulse"><i class="fa-solid fa-clock"></i> +60 Días</span>' : ''}
+                                </h3>
+                                <p class="text-xs text-slate-400">
+                                    ${auto.vin ? `VIN: <span class="font-mono text-slate-600">${auto.vin}</span> | ` : ''}
+                                    Comprado el: <span class="font-medium text-slate-600">${auto.fechaCompra || 'N/A'}</span>
+                                </p>
+                            </div>
+                            <div class="text-right bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                                <span class="text-[10px] text-slate-400 font-bold uppercase block">Días en Piso</span>
+                                <span class="text-sm font-bold ${alertaTiempo ? 'text-rose-600' : 'text-slate-700'}">${diasEnPiso} días</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div><span class="text-slate-400 block text-[10px]">Compra</span><span class="font-bold text-slate-700">$${auto.precioCompra.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
+                            <div><span class="text-slate-400 block text-[10px]">Gastos Extra</span><span class="font-bold text-rose-600">$${totalGastos.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
+                            <div><span class="text-slate-400 block text-[10px]">Costo Total</span><span class="font-bold text-slate-900">$${costoTotal.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
+                            <div><span class="text-slate-400 block text-[10px]">Ganancia</span><span class="font-bold ${ganancia >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${auto.estado === 'Vendido' ? '$' + ganancia.toLocaleString('es-MX', {minimumFractionDigits: 2}) : 'Pendiente'}</span></div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Checklist Documental</span>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                <label onclick="toggleDoc(${auto.id}, 'factura')" class="cursor-pointer select-none px-2.5 py-1 rounded-lg border text-[11px] font-medium ${auto.docs?.factura ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-400'}"><i class="fa-solid ${auto.docs?.factura ? 'fa-square-check text-emerald-600' : 'fa-square'}"></i> Factura Original</label>
+                                <label onclick="toggleDoc(${auto.id}, 'tenencias')" class="cursor-pointer select-none px-2.5 py-1 rounded-lg border text-[11px] font-medium ${auto.docs?.tenencias ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-400'}"><i class="fa-solid ${auto.docs?.tenencias ? 'fa-square-check text-emerald-600' : 'fa-square'}"></i> Tenencias al día</label>
+                                <label onclick="toggleDoc(${auto.id}, 'multas')" class="cursor-pointer select-none px-2.5 py-1 rounded-lg border text-[11px] font-medium ${auto.docs?.multas ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-400'}"><i class="fa-solid ${auto.docs?.multas ? 'fa-square-check text-emerald-600' : 'fa-square'}"></i> Sin Multas</label>
+                                <label onclick="toggleDoc(${auto.id}, 'bajaPlacas')" class="cursor-pointer select-none px-2.5 py-1 rounded-lg border text-[11px] font-medium ${auto.docs?.bajaPlacas ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-400'}"><i class="fa-solid ${auto.docs?.bajaPlacas ? 'fa-square-check text-emerald-600' : 'fa-square'}"></i> Baja de Placas</label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">Gastos Adicionales</span>
+                                <button onclick="agregarGasto(${auto.id})" class="text-[11px] text-indigo-600 font-bold">+ Agregar Gasto</button>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${auto.gastos.length === 0 ? '<span class="text-xs text-slate-400 italic">Sin gastos registrados</span>' : ''}
+                                ${auto.gastos.map((g, index) => `
+                                    <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-lg border">
+                                        <span>${g.concepto}:</span> <strong>$${g.monto.toLocaleString('es-MX')}</strong>
+                                        <button onclick="eliminarGasto(${auto.id}, ${index})" class="text-rose-500 font-bold ml-1">×</button>
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex md:flex-col justify-end gap-2 border-t md:border-t-0 md:border-l border-slate-100 pt-3 md:pt-0 md:pl-5 min-w-[150px]">
+                        ${auto.estado === 'Disponible' 
+                            ? `<button onclick="registrarVenta(${auto.id})" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-sm text-center">Registrar Venta</button>`
+                            : `<button onclick="marcarDisponible(${auto.id})" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-sm text-center">Reabrir Venta</button>`
+                        }
+                        
+                        <!-- BOTÓN CONTRATO RESPONSIVO IMPRIMIBLE -->
+                        <button onclick="generarContrato(${auto.id})" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2 px-3 rounded-xl transition text-center flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-file-contract"></i> Contrato / Responsivo
+                        </button>
+
+                        <button onclick="eliminarAuto(${auto.id})" class="w-full bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-700 text-xs font-bold py-2 px-3 rounded-xl transition text-center">
+                            Eliminar Auto
+                        </button>
+                    </div>
+                `;
+
+                lista.appendChild(card);
+            });
+
+            document.getElementById('inversionTotal').textContent = `$${invTotal.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+            document.getElementById('ventasTotales').textContent = `$${venTotal.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+            document.getElementById('gananciaTotal').textContent = `$${ganTotal.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+            document.getElementById('autosInventario').textContent = disponiblesCount;
+            document.getElementById('promedioDias').textContent = `${totalVendidosCount > 0 ? Math.round(sumaDiasVendidos / totalVendidosCount) : 0} días`;
+        }
+
+        render();
+    </script>
+</body>
+</html>
