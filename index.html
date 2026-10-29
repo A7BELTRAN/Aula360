@@ -186,8 +186,8 @@
         </div>
     </div>
 
-    <!-- MODAL DE VENTA Y CAPTURA LEGAL REORGANIZADO -->
-    <div id="modalVenta" class="fixed inset-0 bg-slate-950/90 hidden z-50 overflow-y-auto p-4 flex justify-center items-center">
+    <!-- MODAL DE VENTA OPTIMIZADO CON SCROLL SUPERIOR (items-start) -->
+    <div id="modalVenta" class="fixed inset-0 bg-slate-950/90 hidden z-50 overflow-y-auto p-3 sm:p-6 flex justify-center items-start">
         <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-2xl p-6 rounded-2xl shadow-2xl relative space-y-4 my-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 class="font-bold text-emerald-400 text-sm"><i class="fa-solid fa-file-contract"></i> Datos de Venta y Contrato</h3>
@@ -246,7 +246,7 @@
                         </div>
                         <div>
                             <label class="text-slate-400 block mb-1">Kilometraje Actual</label>
-                            <input type="text" id="vKm" placeholder="Ej. 65,400 km" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <input type="text" id="vKm" placeholder="Ej. 65,400 km" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
                         <div>
                             <label class="text-slate-400 block mb-1">Forma de Pago / Referencia</label>
@@ -255,7 +255,7 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 3: PRECIO FINAL DE VENTA (AHORA ABAJO) -->
+                <!-- SECCIÓN 3: PRECIO FINAL DE VENTA (UBICADO ABAJO) -->
                 <div class="bg-emerald-950/30 border border-emerald-500/40 p-4 rounded-2xl">
                     <div class="max-w-xs">
                         <label class="text-emerald-300 font-bold block mb-1.5 text-xs"><i class="fa-solid fa-tag"></i> Precio Final de Venta ($)*</label>
