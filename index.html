@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seminuevos Beltrán - Control y Gestión</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        html, body {
-            max-width: 100vw;
-            overflow-x: hidden;
-        }
+        html, body { max-width: 100vw; overflow-x: hidden; }
         @media print {
             body * { visibility: hidden; }
             #seccionContrato, #seccionContrato * { visibility: visible; }
@@ -35,7 +30,7 @@
                     <div class="bg-amber-500 text-slate-950 p-2 rounded-xl text-lg"><i class="fa-solid fa-car-side"></i></div>
                     Seminuevos Beltrán
                 </h1>
-                <p class="text-slate-400 text-xs mt-1">Control financiero, inventario, gastos operativos y contratos</p>
+                <p class="text-slate-400 text-xs mt-1">Control financiero profesional, inventario, gastos y contratos</p>
             </div>
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <button onclick="exportarDatos()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
@@ -142,6 +137,47 @@
 
     </div>
 
+    <!-- MODAL DE EDICIÓN -->
+    <div id="modalEditar" class="fixed inset-0 bg-slate-950/90 hidden z-50 p-4 flex justify-center items-center">
+        <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-lg p-6 rounded-2xl shadow-2xl relative space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-amber-400 text-sm"><i class="fa-solid fa-pen-to-square"></i> Editar Datos del Vehículo</h3>
+                <button onclick="cerrarModalEditar()" class="text-slate-400 hover:text-white font-bold text-sm">×</button>
+            </div>
+            <form id="editForm" onsubmit="guardarEdicionAuto(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="editId">
+                <div>
+                    <label class="text-slate-400 block mb-1">Auto (Marca, Modelo, Año)*</label>
+                    <input type="text" id="editNombre" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-slate-400 block mb-1">VIN / Serie*</label>
+                        <input type="text" id="editVin" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Precio de Compra ($)*</label>
+                        <input type="number" id="editPrecioCompra" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-slate-400 block mb-1">Fecha de Compra*</label>
+                        <input type="date" id="editFechaCompra" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Vendedor / Proveedor</label>
+                        <input type="text" id="editVendedor" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl">Guardar Cambios</button>
+                    <button type="button" onclick="cerrarModalEditar()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2.5 rounded-xl">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL CALCULADORA DE FINANCIAMIENTO -->
     <div id="modalCalc" class="fixed inset-0 bg-slate-950/90 hidden z-50 p-4 flex justify-center items-center">
         <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-md p-6 rounded-2xl shadow-2xl relative space-y-4">
@@ -155,9 +191,9 @@
                     <input type="number" id="calcPrecioTotal" oninput="calcularCuotas()" class="w-full bg-slate-950 border border-slate-800 p-2 rounded-xl text-white outline-none">
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-center">
-                    <button onclick="setEnganchePct(0.3)" class="bg-slate-800 hover:bg-slate-700 py-1.5 rounded-lg border border-slate-700 font-bold">30% Enganche</button>
-                    <button onclick="setEnganchePct(0.4)" class="bg-slate-800 hover:bg-slate-700 py-1.5 rounded-lg border border-slate-700 font-bold">40% Enganche</button>
-                    <button onclick="setEnganchePct(0.5)" class="bg-slate-800 hover:bg-slate-700 py-1.5 rounded-lg border border-slate-700 font-bold">50% Enganche</button>
+                    <button type="button" onclick="setEnganchePct(0.3)" class="bg-slate-800 hover:bg-slate-700 py-1.5 rounded-lg border border-slate-700 font-bold">30% Enganche</button>
+                    <button type="button" onclick="setEnganchePct(0.4)" class="bg-slate-800 hover:bg-slate-700 py-1.5 rounded-lg border border-slate-700 font-bold">40% Enganche</button>
+                    <button type="button" onclick="setEnganchePct(0.5)" class="bg-slate-800 hover:bg-slate-700 py-1.5 rounded-lg border border-slate-700 font-bold">50% Enganche</button>
                 </div>
                 <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
                     <div class="flex justify-between"><span>Enganche Requerido:</span><strong id="calcMontoEnganche" class="text-emerald-400">$0.00</strong></div>
@@ -279,6 +315,36 @@
             guardarDatos();
         });
 
+        function abrirModalEditar(autoId) {
+            const auto = autos.find(a => a.id === autoId);
+            if (!auto) return;
+            document.getElementById('editId').value = auto.id;
+            document.getElementById('editNombre').value = auto.nombre;
+            document.getElementById('editVin').value = auto.vin || '';
+            document.getElementById('editPrecioCompra').value = auto.precioCompra;
+            document.getElementById('editFechaCompra').value = auto.fechaCompra || '';
+            document.getElementById('editVendedor').value = auto.vendedorInfo || '';
+            document.getElementById('modalEditar').classList.remove('hidden');
+        }
+
+        function cerrarModalEditar() { document.getElementById('modalEditar').classList.add('hidden'); }
+
+        function guardarEdicionAuto(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editId').value);
+            const auto = autos.find(a => a.id === id);
+            if (!auto) return;
+
+            auto.nombre = document.getElementById('editNombre').value.trim();
+            auto.vin = document.getElementById('editVin').value.trim().toUpperCase();
+            auto.precioCompra = parseFloat(document.getElementById('editPrecioCompra').value) || 0;
+            auto.fechaCompra = document.getElementById('editFechaCompra').value;
+            auto.vendedorInfo = document.getElementById('editVendedor').value.trim();
+
+            cerrarModalEditar();
+            guardarDatos();
+        }
+
         function convertirBase64(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -324,10 +390,7 @@
             document.getElementById('modalCalc').classList.remove('hidden');
         }
 
-        function setEnganchePct(pct) {
-            pctEngancheCalc = pct;
-            calcularCuotas();
-        }
+        function setEnganchePct(pct) { pctEngancheCalc = pct; calcularCuotas(); }
 
         function calcularCuotas() {
             const precio = parseFloat(document.getElementById('calcPrecioTotal').value) || 0;
@@ -336,7 +399,6 @@
 
             document.getElementById('calcMontoEnganche').textContent = `$${enganche.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
             document.getElementById('calcSaldoRestante').textContent = `$${saldo.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
-
             document.getElementById('m6').textContent = `$${Math.round(saldo / 6).toLocaleString('es-MX')}/mes`;
             document.getElementById('m12').textContent = `$${Math.round(saldo / 12).toLocaleString('es-MX')}/mes`;
             document.getElementById('m18').textContent = `$${Math.round(saldo / 18).toLocaleString('es-MX')}/mes`;
@@ -534,7 +596,7 @@
                     <div class="w-full lg:w-40 h-36 bg-slate-950 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-slate-800 relative">
                         ${auto.imagen ? `<img src="${auto.imagen}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-car text-3xl text-slate-700"></i>`}
                         <span class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded-full ${auto.estado === 'Vendido' ? 'bg-emerald-500 text-slate-950' : 'bg-amber-400 text-slate-950'}">${auto.estado}</span>
-                        <button onclick="cambiarFotoAuto(${auto.id})" class="absolute bottom-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white p-1.5 rounded-lg text-xs border border-slate-700"><i class="fa-solid fa-camera"></i></button>
+                        <button onclick="cambiarFotoAuto(${auto.id})" class="absolute bottom-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white p-1.5 rounded-lg text-xs border border-slate-700" title="Cambiar foto"><i class="fa-solid fa-camera"></i></button>
                     </div>
 
                     <div class="flex-1 space-y-3 min-w-0">
@@ -598,6 +660,9 @@
                             ? `<button onclick="registrarVenta(${auto.id})" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 px-3 rounded-xl transition text-center shadow-sm">Vender</button>`
                             : `<button onclick="marcarDisponible(${auto.id})" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-2 px-3 rounded-xl transition text-center shadow-sm">Reabrir</button>`
                         }
+                        <button onclick="abrirModalEditar(${auto.id})" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold py-2 px-3 rounded-xl transition text-center flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                        </button>
                         <button onclick="abrirCalc(${auto.id})" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 px-3 rounded-xl transition text-center flex items-center justify-center gap-1">
                             <i class="fa-solid fa-calculator"></i> Enganche
                         </button>
@@ -622,4 +687,4 @@
         render();
     </script>
 </body>
-    </html>
+</html>
