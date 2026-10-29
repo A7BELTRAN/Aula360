@@ -197,16 +197,12 @@
             <form id="ventaForm" onsubmit="procesarVenta(event)" class="space-y-4 text-xs">
                 <input type="hidden" id="ventaAutoId">
 
-                <!-- SECCIÓN 1: DATOS DE VENTA Y COMPRADOR (DISEÑO MEJORADO) -->
+                <!-- SECCIÓN 1: DATOS DEL COMPRADOR -->
                 <div class="bg-slate-950/70 border border-amber-500/30 p-4 rounded-2xl space-y-3">
                     <p class="font-bold text-amber-400 flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
-                        <i class="fa-solid fa-user-check"></i> 1. Precio y Datos del Comprador
+                        <i class="fa-solid fa-user-check"></i> 1. Datos Generales del Comprador
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-slate-300 font-semibold block mb-1">Precio Final de Venta ($)*</label>
-                            <input type="number" id="vPrecioVenta" required placeholder="Ej. 185000" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white font-bold text-amber-400 outline-none focus:border-amber-500">
-                        </div>
                         <div>
                             <label class="text-slate-300 font-semibold block mb-1">Nombre Completo del Comprador*</label>
                             <input type="text" id="vCompradorNombre" required placeholder="Ej. María Fernanda Ruiz" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
@@ -222,10 +218,6 @@
                         <div>
                             <label class="text-slate-300 font-semibold block mb-1">Teléfono y Correo del Comprador</label>
                             <input type="text" id="vCompradorContacto" placeholder="6671234567 / correo@mail.com" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
-                        </div>
-                        <div>
-                            <label class="text-slate-300 font-semibold block mb-1">Forma de Pago / Referencia</label>
-                            <input type="text" id="vFormaPago" placeholder="Ej. Transferencia BBVA / Efectivo" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                     </div>
                 </div>
@@ -246,16 +238,28 @@
                         </div>
                         <div>
                             <label class="text-slate-400 block mb-1">No. Folio Tarjeta Circulación</label>
-                            <input type="text" id="vTarjeta" placeholder="Ej. TC-554433" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <input type="text" id="vTarjeta" placeholder="Ej. TC-554433" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
                         <div>
                             <label class="text-slate-400 block mb-1">Color Exterior e Interior</label>
-                            <input type="text" id="vColor" placeholder="Ej. Gris Plata / Piel Negra" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <input type="text" id="vColor" placeholder="Ej. Gris Plata / Piel Negra" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
-                        <div class="sm:col-span-2">
+                        <div>
                             <label class="text-slate-400 block mb-1">Kilometraje Actual</label>
                             <input type="text" id="vKm" placeholder="Ej. 65,400 km" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
+                        <div>
+                            <label class="text-slate-400 block mb-1">Forma de Pago / Referencia</label>
+                            <input type="text" id="vFormaPago" placeholder="Ej. Transferencia BBVA / Efectivo" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: PRECIO FINAL DE VENTA (AHORA ABAJO) -->
+                <div class="bg-emerald-950/30 border border-emerald-500/40 p-4 rounded-2xl">
+                    <div class="max-w-xs">
+                        <label class="text-emerald-300 font-bold block mb-1.5 text-xs"><i class="fa-solid fa-tag"></i> Precio Final de Venta ($)*</label>
+                        <input type="number" id="vPrecioVenta" required placeholder="Ej. 185000" class="w-full bg-slate-900 border border-emerald-500/60 p-3 rounded-xl text-white font-black text-base text-emerald-400 outline-none focus:border-emerald-400">
                     </div>
                 </div>
 
