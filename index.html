@@ -186,77 +186,82 @@
         </div>
     </div>
 
-    <!-- MODAL DE VENTA Y CAPTURA LEGAL COMPLETA PARA CONTRATO -->
+    <!-- MODAL DE VENTA Y CAPTURA LEGAL REORGANIZADO -->
     <div id="modalVenta" class="fixed inset-0 bg-slate-950/90 hidden z-50 overflow-y-auto p-4 flex justify-center items-center">
         <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-2xl p-6 rounded-2xl shadow-2xl relative space-y-4 my-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 class="font-bold text-emerald-400 text-sm"><i class="fa-solid fa-file-contract"></i> Datos de Venta y Contrato</h3>
                 <button type="button" onclick="cerrarModalVenta()" class="text-slate-400 hover:text-white font-bold text-sm">×</button>
             </div>
-            <form id="ventaForm" onsubmit="procesarVenta(event)" class="space-y-3 text-xs">
+            
+            <form id="ventaForm" onsubmit="procesarVenta(event)" class="space-y-4 text-xs">
                 <input type="hidden" id="ventaAutoId">
 
-                <!-- SECCIÓN DATOS DE VENTA Y COMPRADOR -->
-                <div class="border-b border-slate-800 pb-3">
-                    <p class="font-bold text-amber-400 mb-2">Datos de la Venta y Comprador</p>
+                <!-- SECCIÓN 1: DATOS DE VENTA Y COMPRADOR (DISEÑO MEJORADO) -->
+                <div class="bg-slate-950/70 border border-amber-500/30 p-4 rounded-2xl space-y-3">
+                    <p class="font-bold text-amber-400 flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
+                        <i class="fa-solid fa-user-check"></i> 1. Precio y Datos del Comprador
+                    </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="text-slate-400 block mb-1">Precio Final de Venta ($)*</label>
-                            <input type="number" id="vPrecioVenta" required placeholder="Ej. 185000" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label class="text-slate-300 font-semibold block mb-1">Precio Final de Venta ($)*</label>
+                            <input type="number" id="vPrecioVenta" required placeholder="Ej. 185000" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white font-bold text-amber-400 outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Nombre Completo del Comprador*</label>
-                            <input type="text" id="vCompradorNombre" required placeholder="Ej. María Fernanda Ruiz" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <label class="text-slate-300 font-semibold block mb-1">Nombre Completo del Comprador*</label>
+                            <input type="text" id="vCompradorNombre" required placeholder="Ej. María Fernanda Ruiz" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Domicilio Completo (Calle, Col, C.P., Ciudad)</label>
-                            <input type="text" id="vCompradorDireccion" placeholder="Av. Álvaro Obregón #123, Centro, Culiacán" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label class="text-slate-300 font-semibold block mb-1">Domicilio Completo (Calle, Col, C.P., Ciudad)</label>
+                            <input type="text" id="vCompradorDireccion" placeholder="Av. Álvaro Obregón #123, Centro, Culiacán" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Identificación Oficial (INE / Pasaporte) y Folio</label>
-                            <input type="text" id="vCompradorIne" placeholder="INE Folio: 1234567890" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label class="text-slate-300 font-semibold block mb-1">Identificación Oficial (INE / Pasaporte) y Folio</label>
+                            <input type="text" id="vCompradorIne" placeholder="INE Folio: 1234567890" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Teléfono y Correo del Comprador</label>
-                            <input type="text" id="vCompradorContacto" placeholder="6671234567 / correo@mail.com" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label class="text-slate-300 font-semibold block mb-1">Teléfono y Correo del Comprador</label>
+                            <input type="text" id="vCompradorContacto" placeholder="6671234567 / correo@mail.com" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Forma de Pago / Referencia</label>
-                            <input type="text" id="vFormaPago" placeholder="Ej. Transferencia BBVA / Efectivo" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label class="text-slate-300 font-semibold block mb-1">Forma de Pago / Referencia</label>
+                            <input type="text" id="vFormaPago" placeholder="Ej. Transferencia BBVA / Efectivo" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN DATOS TÉCNICOS DEL VEHÍCULO -->
-                <div class="pt-1">
-                    <p class="font-bold text-amber-400 mb-2">Datos Técnicos Específicos del Vehículo</p>
+                <!-- SECCIÓN 2: DATOS TÉCNICOS DEL VEHÍCULO -->
+                <div class="bg-slate-950/40 border border-slate-800 p-4 rounded-2xl space-y-3">
+                    <p class="font-bold text-slate-300 flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
+                        <i class="fa-solid fa-car"></i> 2. Datos Técnicos Específicos del Vehículo para Contrato
+                    </p>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label class="text-slate-400 block mb-1">No. de Serie del Motor</label>
-                            <input type="text" id="vMotor" placeholder="Ej. MOT-987654" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <input type="text" id="vMotor" placeholder="Ej. MOT-987654" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
                         <div>
                             <label class="text-slate-400 block mb-1">Placas Actuales y Estado</label>
-                            <input type="text" id="vPlacas" placeholder="Ej. VXX-123-A (Sinaloa)" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <input type="text" id="vPlacas" placeholder="Ej. VXX-123-A (Sinaloa)" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
                         <div>
                             <label class="text-slate-400 block mb-1">No. Folio Tarjeta Circulación</label>
-                            <input type="text" id="vTarjeta" placeholder="Ej. TC-554433" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <input type="text" id="vTarjeta" placeholder="Ej. TC-554433" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
                             <label class="text-slate-400 block mb-1">Color Exterior e Interior</label>
-                            <input type="text" id="vColor" placeholder="Ej. Gris Plata / Piel Negra" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <input type="text" id="vColor" placeholder="Ej. Gris Plata / Piel Negra" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
-                        <div>
+                        <div class="sm:col-span-2">
                             <label class="text-slate-400 block mb-1">Kilometraje Actual</label>
-                            <input type="text" id="vKm" placeholder="Ej. 65,400 km" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <input type="text" id="vKm" placeholder="Ej. 65,400 km" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                     </div>
                 </div>
 
-                <div class="flex gap-2 pt-3 border-t border-slate-800">
-                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl">Confirmar Venta y Generar Contrato</button>
-                    <button type="button" onclick="cerrarModalVenta()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2.5 rounded-xl">Cancelar</button>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl shadow-lg transition">Confirmar Venta y Generar Contrato</button>
+                    <button type="button" onclick="cerrarModalVenta()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-5 py-3 rounded-xl transition">Cancelar</button>
                 </div>
             </form>
         </div>
@@ -622,17 +627,32 @@
         }
 
         function importarDatos(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data)) { autos = data; } 
-                    else if (data.autos) { autos = data.autos; gastosFijos = data.gastosFijos || []; }
+                    
+                    if (Array.isArray(data)) {
+                        autos = data;
+                    } else if (data && typeof data === 'object') {
+                        autos = Array.isArray(data.autos) ? data.autos : [];
+                        gastosFijos = Array.isArray(data.gastosFijos) ? data.gastosFijos : [];
+                    } else {
+                        throw new Error("Estructura no válida");
+                    }
+
                     guardarDatos();
-                    alert("¡Datos importados con éxito!");
-                } catch (err) { alert("Archivo no válido."); }
+                    alert("¡Datos restaurados con éxito!");
+                } catch (err) {
+                    alert("El archivo seleccionado no es un respaldo válido de JSON.");
+                } finally {
+                    event.target.value = '';
+                }
             };
-            reader.readAsText(event.target.files[0]);
+            reader.readAsText(file);
         }
 
         function render() {
