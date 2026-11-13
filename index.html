@@ -2,18 +2,32 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seminuevos Beltrán - Control y Gestión</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title id="pageTitle">Seminuevos Beltrán - Control y Gestión</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        html, body { max-width: 100vw; overflow-x: hidden; }
+        /* Optimizaciones estrictas para evitar scrolls laterales en iOS y Android */
+        html, body { 
+            max-width: 100vw; 
+            overflow-x: hidden; 
+            -webkit-text-size-adjust: 100%;
+        }
+        input, select, textarea, button {
+            font-size: 16px !important; /* Evita el zoom automático molesto en iPhone al enfocar inputs */
+        }
+        @media (min-width: 768px) {
+            input, select, textarea, button {
+                font-size: 12px !important; /* Regresa a tamaño compacto en computadoras y tablets */
+            }
+        }
         @media print {
             body * { visibility: hidden; }
             #seccionContrato, #seccionContrato * { visibility: visible; }
             #seccionContrato {
                 position: absolute; left: 0; top: 0; width: 100%;
-                background: white !important; color: black !important; padding: 15px !important;
+                background: white !important; color: black !important; padding: 10px !important;
+                font-size: 11px !important; line-height: 1.35 !important;
             }
             .no-print { display: none !important; }
         }
@@ -21,101 +35,129 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen p-3 md:p-6 overflow-x-hidden">
 
-    <div class="max-w-7xl mx-auto space-y-5 no-print w-full">
+    <div class="max-w-7xl mx-auto space-y-4 sm:space-y-5 no-print w-full">
         
         <!-- ENCABEZADO -->
-        <header class="bg-slate-900 border border-slate-800 text-white p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2.5">
-                    <div class="bg-amber-500 text-slate-950 p-2 rounded-xl text-lg"><i class="fa-solid fa-car-side"></i></div>
-                    Seminuevos Beltrán
-                </h1>
-                <p class="text-slate-400 text-xs mt-1">Control financiero profesional, inventario, gastos y contratos</p>
+        <header class="bg-slate-900 border border-slate-800 text-white p-4 sm:p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="bg-amber-500 text-slate-950 p-2.5 rounded-xl text-lg flex-shrink-0"><i class="fa-solid fa-car-side"></i></div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 id="nombreNegocioTxt" class="text-lg sm:text-2xl font-black tracking-tight truncate">Seminuevos Beltrán</h1>
+                        <button onclick="cambiarNombreNegocio()" class="text-slate-400 hover:text-amber-400 text-xs bg-slate-950 hover:bg-slate-800 px-2 py-1 rounded-lg border border-slate-800 transition flex-shrink-0" title="Cambiar nombre del negocio">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                    <p id="txtSubHeader" class="text-slate-400 text-[11px] sm:text-xs mt-0.5">Control financiero profesional, inventario, gastos y contratos</p>
+                </div>
             </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <button onclick="exportarDatos()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
+                <!-- SELECTOR DE IDIOMA / VERSIÓN GLOBAL -->
+                <div class="bg-slate-950 border border-slate-800 p-1 rounded-xl flex items-center text-xs">
+                    <button onclick="cambiarIdioma('es')" id="langEs" class="px-2.5 py-1.5 rounded-lg font-bold bg-amber-500 text-slate-950 transition">🇲🇽 ESP</button>
+                    <button onclick="cambiarIdioma('en')" id="langEn" class="px-2.5 py-1.5 rounded-lg font-bold text-slate-400 hover:text-white transition">🇺🇸 USA</button>
+                </div>
+                <button onclick="exportarDatos()" id="btnBackup" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
                     <i class="fa-solid fa-download text-amber-400"></i> Respaldar
                 </button>
                 <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-xl border border-slate-700 cursor-pointer transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-upload text-blue-400"></i> Restaurar
+                    <i class="fa-solid fa-upload text-blue-400"></i> <span id="txtRestore">Restaurar</span>
                     <input type="file" id="importFile" class="hidden" accept=".json" onchange="importarDatos(event)">
                 </label>
             </div>
         </header>
 
         <!-- TARJETAS DE MÉTRICAS -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-            <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inversión Total</p>
-                <p id="inversionTotal" class="text-base sm:text-lg font-black text-white mt-1 break-words">$0.00</p>
-                <span class="text-[10px] text-slate-500">Compras + Gastos Auto</span>
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
+            <div class="bg-slate-900/90 border border-slate-800 p-3.5 sm:p-4 rounded-2xl shadow-sm">
+                <p id="m1Title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Inversión Total</p>
+                <p id="inversionTotal" class="text-sm sm:text-lg font-black text-white mt-1 break-all">$0.00</p>
+                <span id="m1Sub" class="text-[9px] sm:text-[10px] text-slate-500 block">Compras + Gastos Auto</span>
             </div>
-            <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ventas Totales</p>
-                <p id="ventasTotales" class="text-base sm:text-lg font-black text-blue-400 mt-1 break-words">$0.00</p>
-                <span class="text-[10px] text-slate-500">Ingreso de Vendidos</span>
+            <div class="bg-slate-900/90 border border-slate-800 p-3.5 sm:p-4 rounded-2xl shadow-sm">
+                <p id="m2Title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ventas Totales</p>
+                <p id="ventasTotales" class="text-sm sm:text-lg font-black text-blue-400 mt-1 break-all">$0.00</p>
+                <span id="m2Sub" class="text-[9px] sm:text-[10px] text-slate-500 block">Ingreso de Vendidos</span>
             </div>
-            <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gastos Fijos/Negocio</p>
-                <p id="gastosFijosTotal" class="text-base sm:text-lg font-black text-rose-400 mt-1 break-words">$0.00</p>
-                <button onclick="agregarGastoOperativo()" class="text-[10px] text-amber-400 hover:underline font-bold mt-0.5">+ Registrar Gasto</button>
+            <div class="bg-slate-900/90 border border-slate-800 p-3.5 sm:p-4 rounded-2xl shadow-sm">
+                <p id="m3Title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Gastos Fijos/Negocio</p>
+                <p id="gastosFijosTotal" class="text-sm sm:text-lg font-black text-rose-400 mt-1 break-all">$0.00</p>
+                <button onclick="agregarGastoOperativo()" id="m3Btn" class="text-[10px] text-amber-400 hover:underline font-bold mt-0.5 block">+ Registrar Gasto</button>
             </div>
-            <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ganancia Libre Real</p>
-                <p id="gananciaTotal" class="text-base sm:text-lg font-black text-emerald-400 mt-1 break-words">$0.00</p>
-                <span class="text-[10px] text-slate-500">Ventas - Costos - Fijos</span>
+            <div class="bg-slate-900/90 border border-slate-800 p-3.5 sm:p-4 rounded-2xl shadow-sm">
+                <p id="m4Title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ganancia Libre Real</p>
+                <p id="gananciaTotal" class="text-sm sm:text-lg font-black text-emerald-400 mt-1 break-all">$0.00</p>
+                <span id="m4Sub" class="text-[9px] sm:text-[10px] text-slate-500 block">Ventas - Costos - Fijos</span>
             </div>
-            <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-sm col-span-2 lg:col-span-1">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">En Piso / Rotación</p>
-                <p id="autosInventario" class="text-base sm:text-lg font-black text-amber-400 mt-1">0 autos</p>
-                <span id="promedioDias" class="text-[10px] text-slate-400">Prom. 0 días / venta</span>
+            <div class="bg-slate-900/90 border border-slate-800 p-3.5 sm:p-4 rounded-2xl shadow-sm col-span-2 lg:col-span-1">
+                <p id="m5Title" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">En Piso / Rotación</p>
+                <p id="autosInventario" class="text-sm sm:text-lg font-black text-amber-400 mt-1">0 autos</p>
+                <span id="promedioDias" class="text-[9px] sm:text-[10px] text-slate-400 block">Prom. 0 días / venta</span>
             </div>
         </div>
 
-        <!-- FORMULARIO DE REGISTRO DE VEHÍCULO -->
-        <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-sm">
-            <h2 class="text-sm font-bold text-slate-200 mb-3.5 flex items-center gap-2">
-                <i class="fa-solid fa-square-plus text-amber-400"></i> Registrar Nuevo Vehículo
-            </h2>
+        <!-- BOTÓN TOGGLE PARA ABRIR/CERRAR FORMULARIO DE REGISTRO -->
+        <div>
+            <button onclick="toggleFormularioRegistro()" id="btnToggleForm" class="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs py-3 px-4 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                <i class="fa-solid fa-square-plus text-sm"></i> <span id="txtBtnToggle">Registrar Nuevo Vehículo</span>
+            </button>
+        </div>
+
+        <!-- FORMULARIO DE REGISTRO DE VEHÍCULO (OCULTO POR DEFECTO) -->
+        <div id="contenedorFormulario" class="bg-slate-900/90 border border-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm hidden">
+            <div class="flex justify-between items-center mb-3.5 border-b border-slate-800 pb-2.5">
+                <h2 id="fRegTitle" class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-square-plus text-amber-400"></i> Registrar Nuevo Vehículo
+                </h2>
+                <button type="button" onclick="toggleFormularioRegistro()" id="btnCerrarForm" class="text-slate-400 hover:text-white font-bold text-xs bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 transition">✕ <span id="txtCloseForm">Cerrar</span></button>
+            </div>
             <form id="carForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                 <div>
-                    <label class="font-bold text-slate-300 block mb-1">Auto (Marca, Submarca, Año)*</label>
-                    <input type="text" id="nombreAuto" required placeholder="Ej. Nissan Versa 2019" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                    <label id="fLblAuto" class="font-bold text-slate-300 block mb-1">Auto (Marca, Submarca, Año)*</label>
+                    <input type="text" id="nombreAuto" required placeholder="Ej. Nissan Versa 2019" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-300 block mb-1">VIN / Número de Serie (17 car)*</label>
-                    <input type="text" id="vinAuto" required placeholder="Ej. 3FA6P8CF5..." class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 uppercase focus:border-amber-500 outline-none">
+                    <label id="fLblVin" class="font-bold text-slate-300 block mb-1">VIN / Número de Serie (17 car)*</label>
+                    <input type="text" id="vinAuto" required placeholder="Ej. 3FA6P8CF5..." class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 uppercase focus:border-amber-500 outline-none">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-300 block mb-1">Precio de Compra ($)*</label>
-                    <input type="number" id="precioCompra" required placeholder="140000" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                    <label id="fLblCompra" class="font-bold text-slate-300 block mb-1">Precio de Compra ($)*</label>
+                    <input type="number" id="precioCompra" required placeholder="140000" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-300 block mb-1">Fecha de Compra*</label>
-                    <input type="date" id="fechaCompra" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                    <label id="fLblFechaC" class="font-bold text-slate-300 block mb-1">Fecha de Compra*</label>
+                    <input type="date" id="fechaCompra" required class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-300 block mb-1">Vendedor / Proveedor (Nombre)*</label>
-                    <input type="text" id="vendedorInfo" required placeholder="Ej. Juan Pérez López" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                    <label id="fLblVend" class="font-bold text-slate-300 block mb-1">Vendedor / Proveedor (Nombre)*</label>
+                    <input type="text" id="vendedorInfo" required placeholder="Ej. Juan Pérez López" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-300 block mb-1">Domicilio del Vendedor</label>
-                    <input type="text" id="vendedorDir" placeholder="Ej. Col. Las Quintas, Culiacán" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                    <label id="fLblVendDir" class="font-bold text-slate-300 block mb-1">Domicilio del Vendedor</label>
+                    <input type="text" id="vendedorDir" placeholder="Ej. Col. Las Quintas, Culiacán" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-300 block mb-1">INE / Teléfono del Vendedor</label>
-                    <input type="text" id="vendedorIne" placeholder="INE Folio / Tel: 667..." class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                    <label id="fLblVendIne" class="font-bold text-slate-300 block mb-1">INE / Identificación Vendedor</label>
+                    <input type="text" id="vendedorIne" placeholder="Folio INE / ID" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
                 </div>
                 <div>
-                    <label class="font-bold text-slate-300 block mb-1"><i class="fa-solid fa-camera text-amber-400"></i> Foto / URL de Imagen</label>
-                    <input type="url" id="imagenAuto" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                    <label id="fLblVendTel" class="font-bold text-slate-300 block mb-1">Teléfono del Vendedor</label>
+                    <input type="text" id="vendedorTel" placeholder="667..." class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                </div>
+                <div>
+                    <label id="fLblKmReg" class="font-bold text-slate-300 block mb-1">Kilometraje Actual</label>
+                    <input type="text" id="vendedorKm" placeholder="Ej. 75000 km" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
+                </div>
+                <div>
+                    <label id="fLblFoto" class="font-bold text-slate-300 block mb-1"><i class="fa-solid fa-camera text-amber-400"></i> Foto / URL de Imagen</label>
+                    <input type="url" id="imagenAuto" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-slate-200 focus:border-amber-500 outline-none">
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="font-bold text-slate-300 block mb-1">O subir Foto de Galería</label>
-                    <input type="file" id="imagenLocal" accept="image/*" class="w-full bg-slate-950 border border-slate-800 p-1.5 rounded-xl text-slate-400 text-xs focus:border-amber-500 outline-none cursor-pointer">
+                    <label id="fLblLocalFoto" class="font-bold text-slate-300 block mb-1">O subir Foto de Galería</label>
+                    <input type="file" id="imagenLocal" accept="image/*" class="w-full bg-slate-950 border border-slate-800 p-2 rounded-xl text-slate-400 text-xs focus:border-amber-500 outline-none cursor-pointer">
                 </div>
                 <div class="sm:col-span-2 flex items-end">
-                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 px-4 rounded-xl transition shadow-md">
+                    <button type="submit" id="fBtnSubmit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 sm:py-2.5 px-4 rounded-xl transition shadow-md">
                         + Registrar Auto
                     </button>
                 </div>
@@ -123,19 +165,38 @@
         </div>
 
         <!-- FILTROS Y BÚSQUEDA -->
-        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div class="relative w-full sm:w-72">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
-                <input type="text" id="searchInput" oninput="render()" placeholder="Buscar auto, VIN, cliente..." class="w-full bg-slate-950 border border-slate-800 pl-9 pr-3 py-2 rounded-xl text-xs text-slate-200 outline-none focus:border-amber-500">
+        <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-sm flex flex-col lg:flex-row justify-between items-center gap-3">
+            <div class="relative w-full lg:w-72">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 lg:top-3 text-slate-500 text-xs"></i>
+                <input type="text" id="searchInput" oninput="render()" placeholder="Buscar auto, VIN, cliente..." class="w-full bg-slate-950 border border-slate-800 pl-9 pr-3 py-2.5 lg:py-2 rounded-xl text-xs text-slate-200 outline-none focus:border-amber-500">
             </div>
-            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-                <button onclick="filtrarEstado('Todos')" id="btnEstadoTodos" class="px-3 py-1.5 text-xs font-bold rounded-xl border bg-amber-500 text-slate-950 border-amber-500 transition">Todos</button>
-                <button onclick="filtrarEstado('Disponible')" id="btnEstadoDisponible" class="px-3 py-1.5 text-xs font-bold rounded-xl border bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800 transition">Disponibles</button>
-                <button onclick="filtrarEstado('Vendido')" id="btnEstadoVendido" class="px-3 py-1.5 text-xs font-bold rounded-xl border bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800 transition">Vendidos</button>
-                <select id="sortSelect" onchange="render()" class="text-xs bg-slate-950 border border-slate-800 text-slate-300 p-2 rounded-xl outline-none font-medium">
-                    <option value="reciente">Más Reciente</option>
-                    <option value="masDias">Mayor Tiempo en Piso</option>
-                    <option value="mayorInversion">Mayor Inversión</option>
+            <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
+                <!-- FILTRO DE MES -->
+                <select id="filtroMes" onchange="render()" class="text-xs bg-slate-950 border border-slate-800 text-slate-300 p-2.5 lg:p-2 rounded-xl outline-none font-medium flex-1 sm:flex-initial">
+                    <option value="todos" id="optTodosMeses">📅 Todos los Meses</option>
+                    <option value="2026-10">Octubre 2026</option>
+                    <option value="2026-11">Noviembre 2026</option>
+                    <option value="2026-12">Diciembre 2026</option>
+                    <option value="2027-01">Enero 2027</option>
+                    <option value="2027-02">Febrero 2027</option>
+                    <option value="2027-03">Marzo 2027</option>
+                    <option value="2027-04">Abril 2027</option>
+                    <option value="2027-05">Mayo 2027</option>
+                    <option value="2027-06">Junio 2027</option>
+                    <option value="2027-07">Julio 2027</option>
+                    <option value="2027-08">Agosto 2027</option>
+                    <option value="2027-09">Septiembre 2027</option>
+                    <option value="2027-10">Octubre 2027</option>
+                    <option value="2027-11">Noviembre 2027</option>
+                    <option value="2027-12">Diciembre 2027</option>
+                </select>
+                <button onclick="filtrarEstado('Todos')" id="btnEstadoTodos" class="px-3 py-2 lg:py-1.5 text-xs font-bold rounded-xl border bg-amber-500 text-slate-950 border-amber-500 transition">Todos</button>
+                <button onclick="filtrarEstado('Disponible')" id="btnEstadoDisponible" class="px-3 py-2 lg:py-1.5 text-xs font-bold rounded-xl border bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800 transition">Disponibles</button>
+                <button onclick="filtrarEstado('Vendido')" id="btnEstadoVendido" class="px-3 py-2 lg:py-1.5 text-xs font-bold rounded-xl border bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800 transition">Vendidos</button>
+                <select id="sortSelect" onchange="render()" class="text-xs bg-slate-950 border border-slate-800 text-slate-300 p-2.5 lg:p-2 rounded-xl outline-none font-medium flex-1 sm:flex-initial">
+                    <option value="reciente" id="optReciente">Más Reciente</option>
+                    <option value="masDias" id="optDias">Mayor Tiempo en Piso</option>
+                    <option value="mayorInversion" id="optInv">Mayor Inversión</option>
                 </select>
             </div>
         </div>
@@ -146,211 +207,247 @@
     </div>
 
     <!-- MODAL DE EDICIÓN DE AUTO -->
-    <div id="modalEditar" class="fixed inset-0 bg-slate-950/90 hidden z-50 p-4 flex justify-center items-center">
-        <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-lg p-6 rounded-2xl shadow-2xl relative space-y-4">
+    <div id="modalEditar" class="fixed inset-0 bg-slate-950/90 hidden z-50 p-3 sm:p-4 flex justify-center items-center overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-lg p-5 sm:p-6 rounded-2xl shadow-2xl relative space-y-4 my-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-amber-400 text-sm"><i class="fa-solid fa-pen-to-square"></i> Editar Datos del Vehículo</h3>
-                <button type="button" onclick="cerrarModalEditar()" class="text-slate-400 hover:text-white font-bold text-sm">×</button>
+                <h3 id="editModalTitle" class="font-bold text-amber-400 text-sm"><i class="fa-solid fa-pen-to-square"></i> Editar Datos del Vehículo</h3>
+                <button type="button" onclick="cerrarModalEditar()" class="text-slate-400 hover:text-white font-bold text-base p-1">×</button>
             </div>
             <form id="editForm" onsubmit="guardarEdicionAuto(event)" class="space-y-3 text-xs">
                 <input type="hidden" id="editId">
                 <div>
-                    <label class="text-slate-400 block mb-1">Auto (Marca, Submarca, Año)*</label>
-                    <input type="text" id="editNombre" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                    <label id="eLblAuto" class="text-slate-400 block mb-1">Auto (Marca, Submarca, Año)*</label>
+                    <input type="text" id="editNombre" required class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="text-slate-400 block mb-1">VIN / Serie*</label>
-                        <input type="text" id="editVin" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                        <label id="eLblVin" class="text-slate-400 block mb-1">VIN / Serie*</label>
+                        <input type="text" id="editVin" required class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">Precio de Compra ($)*</label>
-                        <input type="number" id="editPrecioCompra" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                        <label id="eLblPrecio" class="text-slate-400 block mb-1">Precio de Compra ($)*</label>
+                        <input type="number" id="editPrecioCompra" required class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="text-slate-400 block mb-1">Fecha de Compra*</label>
-                        <input type="date" id="editFechaCompra" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                        <label id="eLblFecha" class="text-slate-400 block mb-1">Fecha de Compra*</label>
+                        <input type="date" id="editFechaCompra" required class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">Vendedor / Proveedor</label>
-                        <input type="text" id="editVendedor" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                        <label id="eLblVend" class="text-slate-400 block mb-1">Vendedor / Proveedor</label>
+                        <input type="text" id="editVendedor" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label id="eLblVendIne" class="text-slate-400 block mb-1">INE / ID Vendedor</label>
+                        <input type="text" id="editVendedorIne" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label id="eLblVendTel" class="text-slate-400 block mb-1">Teléfono Vendedor</label>
+                        <input type="text" id="editVendedorTel" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label id="eLblKm" class="text-slate-400 block mb-1">Kilometraje</label>
+                        <input type="text" id="editKm" class="w-full bg-slate-950 border border-slate-800 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                     </div>
                 </div>
                 <div class="flex gap-2 pt-2">
-                    <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl">Guardar Cambios</button>
-                    <button type="button" onclick="cerrarModalEditar()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2.5 rounded-xl">Cancelar</button>
+                    <button type="submit" id="eBtnSave" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl">Guardar Cambios</button>
+                    <button type="button" onclick="cerrarModalEditar()" id="eBtnCancel" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-3 rounded-xl">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL DE VENTA OPTIMIZADO CON SCROLL SUPERIOR (items-start) -->
+    <!-- MODAL DE VENTA -->
     <div id="modalVenta" class="fixed inset-0 bg-slate-950/90 hidden z-50 overflow-y-auto p-3 sm:p-6 flex justify-center items-start">
-        <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-2xl p-6 rounded-2xl shadow-2xl relative space-y-4 my-6">
+        <div class="bg-slate-900 border border-slate-800 text-white w-full max-w-2xl p-4 sm:p-6 rounded-2xl shadow-2xl relative space-y-4 my-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-emerald-400 text-sm"><i class="fa-solid fa-file-contract"></i> Datos de Venta y Contrato</h3>
-                <button type="button" onclick="cerrarModalVenta()" class="text-slate-400 hover:text-white font-bold text-sm">×</button>
+                <h3 id="vModalTitle" class="font-bold text-emerald-400 text-sm"><i class="fa-solid fa-file-contract"></i> Datos de Venta y Contrato</h3>
+                <button type="button" onclick="cerrarModalVenta()" class="text-slate-400 hover:text-white font-bold text-base p-1">×</button>
             </div>
             
             <form id="ventaForm" onsubmit="procesarVenta(event)" class="space-y-4 text-xs">
                 <input type="hidden" id="ventaAutoId">
 
                 <!-- SECCIÓN 1: DATOS DEL COMPRADOR -->
-                <div class="bg-slate-950/70 border border-amber-500/30 p-4 rounded-2xl space-y-3">
-                    <p class="font-bold text-amber-400 flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
+                <div class="bg-slate-950/70 border border-amber-500/30 p-3.5 sm:p-4 rounded-2xl space-y-3">
+                    <p id="vSec1Title" class="font-bold text-amber-400 flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
                         <i class="fa-solid fa-user-check"></i> 1. Datos Generales del Comprador
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="text-slate-300 font-semibold block mb-1">Nombre Completo del Comprador*</label>
-                            <input type="text" id="vCompradorNombre" required placeholder="Ej. María Fernanda Ruiz" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <label id="vLblNombre" class="text-slate-300 font-semibold block mb-1">Nombre Completo del Comprador*</label>
+                            <input type="text" id="vCompradorNombre" required placeholder="Ej. José Miguel Sánchez Félix" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-300 font-semibold block mb-1">Domicilio Completo (Calle, Col, C.P., Ciudad)</label>
-                            <input type="text" id="vCompradorDireccion" placeholder="Av. Álvaro Obregón #123, Centro, Culiacán" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label id="vLblDir" class="text-slate-300 font-semibold block mb-1">Domicilio Completo (Calle, Col, C.P., Ciudad)</label>
+                            <input type="text" id="vCompradorDireccion" placeholder="Colonia Pinos #1828, Culiacán" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-300 font-semibold block mb-1">Identificación Oficial (INE / Pasaporte) y Folio</label>
-                            <input type="text" id="vCompradorIne" placeholder="INE Folio: 1234567890" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label id="vLblIne" class="text-slate-300 font-semibold block mb-1">Identificación Oficial / INE (Folio)</label>
+                            <input type="text" id="vCompradorIne" placeholder="Folio INE / ID: 1234567890" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-300 font-semibold block mb-1">Teléfono y Correo del Comprador</label>
-                            <input type="text" id="vCompradorContacto" placeholder="6671234567 / correo@mail.com" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label id="vLblTel" class="text-slate-300 font-semibold block mb-1">Teléfono del Comprador</label>
+                            <input type="text" id="vCompradorTel" placeholder="6671826391" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label id="vLblCorreo" class="text-slate-300 font-semibold block mb-1">Correo Electrónico (Opcional)</label>
+                            <input type="text" id="vCompradorCorreo" placeholder="correo@mail.com" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                     </div>
                 </div>
 
                 <!-- SECCIÓN 2: DATOS TÉCNICOS DEL VEHÍCULO -->
-                <div class="bg-slate-950/40 border border-slate-800 p-4 rounded-2xl space-y-3">
-                    <p class="font-bold text-slate-300 flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
+                <div class="bg-slate-950/40 border border-slate-800 p-3.5 sm:p-4 rounded-2xl space-y-3">
+                    <p id="vSec2Title" class="font-bold text-slate-300 flex items-center gap-2 border-b border-slate-800 pb-2 text-xs">
                         <i class="fa-solid fa-car"></i> 2. Datos Técnicos Específicos del Vehículo para Contrato
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label class="text-slate-400 block mb-1">No. de Serie del Motor</label>
-                            <input type="text" id="vMotor" placeholder="Ej. MOT-987654" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <label id="vLblMotor" class="text-slate-400 block mb-1">No. de Serie del Motor</label>
+                            <input type="text" id="vMotor" placeholder="Ej. 182UQJSO1N" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Placas Actuales y Estado</label>
-                            <input type="text" id="vPlacas" placeholder="Ej. VXX-123-A (Sinaloa)" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <label id="vLblPlacas" class="text-slate-400 block mb-1">Placas Actuales y Estado</label>
+                            <input type="text" id="vPlacas" placeholder="Ej. SINALOA" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">No. Folio Tarjeta Circulación</label>
-                            <input type="text" id="vTarjeta" placeholder="Ej. TC-554433" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <label id="vLblTarjeta" class="text-slate-400 block mb-1">No. Folio Tarjeta Circulación</label>
+                            <input type="text" id="vTarjeta" placeholder="Ej. N/A o Folio" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Color Exterior e Interior</label>
-                            <input type="text" id="vColor" placeholder="Ej. Gris Plata / Piel Negra" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <label id="vLblColor" class="text-slate-400 block mb-1">Color Exterior e Interior</label>
+                            <input type="text" id="vColor" placeholder="Ej. Plata" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Kilometraje Actual</label>
-                            <input type="text" id="vKm" placeholder="Ej. 65,400 km" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white uppercase outline-none focus:border-amber-500">
+                            <label id="vLblKm" class="text-slate-400 block mb-1">Kilometraje Actual</label>
+                            <input type="text" id="vKm" placeholder="Ej. 94000" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                         <div>
-                            <label class="text-slate-400 block mb-1">Forma de Pago / Referencia</label>
-                            <input type="text" id="vFormaPago" placeholder="Ej. Transferencia BBVA / Efectivo" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
+                            <label id="vLblPago" class="text-slate-400 block mb-1">Forma de Pago / Referencia</label>
+                            <input type="text" id="vFormaPago" placeholder="Ej. Efectivo / Transferencia" class="w-full bg-slate-900 border border-slate-700 p-3 sm:p-2.5 rounded-xl text-white outline-none focus:border-amber-500">
                         </div>
                     </div>
                 </div>
 
-                <!-- SECCIÓN 3: PRECIO FINAL DE VENTA (UBICADO ABAJO) -->
-                <div class="bg-emerald-950/30 border border-emerald-500/40 p-4 rounded-2xl">
-                    <div class="max-w-xs">
-                        <label class="text-emerald-300 font-bold block mb-1.5 text-xs"><i class="fa-solid fa-tag"></i> Precio Final de Venta ($)*</label>
-                        <input type="number" id="vPrecioVenta" required placeholder="Ej. 185000" class="w-full bg-slate-900 border border-emerald-500/60 p-3 rounded-xl text-white font-black text-base text-emerald-400 outline-none focus:border-emerald-400">
+                <!-- SECCIÓN 3: PRECIO FINAL DE VENTA Y PENDIENTES -->
+                <div class="bg-emerald-950/30 border border-emerald-500/40 p-3.5 sm:p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label id="vLblPrecioFin" class="text-emerald-300 font-bold block mb-1.5 text-xs"><i class="fa-solid fa-tag"></i> Precio Final de Venta ($)*</label>
+                        <input type="number" id="vPrecioVenta" required placeholder="Ej. 210000" class="w-full bg-slate-900 border border-emerald-500/60 p-3 rounded-xl text-white font-black text-base text-emerald-400 outline-none focus:border-emerald-400">
+                    </div>
+                    <div>
+                        <label class="text-amber-300 font-bold block mb-1.5 text-xs"><i class="fa-solid fa-triangle-exclamation"></i> Trámite o Nota Pendiente (Opcional)</label>
+                        <input type="text" id="vPendienteNota" placeholder="Ej. Falta entregar baja de placas original" class="w-full bg-slate-900 border border-amber-500/40 p-3 rounded-xl text-white text-xs outline-none focus:border-amber-400">
                     </div>
                 </div>
 
                 <div class="flex gap-2 pt-2">
-                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl shadow-lg transition">Confirmar Venta y Generar Contrato</button>
-                    <button type="button" onclick="cerrarModalVenta()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-5 py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" id="vBtnConfirm" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl shadow-lg transition">Confirmar Venta y Generar Contrato</button>
+                    <button type="button" onclick="cerrarModalVenta()" id="vBtnCancel" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-3.5 rounded-xl transition">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL CONTRATO OFICIAL IMPRIMIBLE -->
+    <!-- MODAL CONTRATO OFICIAL -->
     <div id="modalContrato" class="fixed inset-0 bg-slate-950/90 hidden z-50 overflow-y-auto p-3 sm:p-6 flex justify-center items-start">
-        <div class="bg-white text-slate-900 w-full max-w-4xl p-6 sm:p-8 rounded-2xl shadow-2xl relative my-6">
-            <div class="no-print flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
-                <h3 class="font-bold text-slate-800 text-sm sm:text-base">Contrato Oficial - Seminuevos Beltrán</h3>
-                <div class="flex gap-2">
-                    <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-print"></i> Imprimir / PDF
+        <div class="bg-white text-slate-900 w-full max-w-4xl p-5 sm:p-8 rounded-2xl shadow-2xl relative my-6">
+            <div class="no-print flex justify-between items-center mb-6 pb-4 border-b border-slate-200 gap-2 flex-wrap">
+                <div>
+                    <h3 id="cTituloPrincipal" class="font-bold text-slate-800 text-sm sm:text-base">Contrato Oficial - Seminuevos Beltrán</h3>
+                    <p id="subtituloModalContrato" class="text-xs text-slate-500"></p>
+                </div>
+                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <button onclick="copiarResumenWhatsApp()" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> <span id="btnTxtWp">WhatsApp</span>
                     </button>
-                    <button onclick="cerrarContrato()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition">Cerrar</button>
+                    <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
+                        <i class="fa-solid fa-print"></i> <span id="btnTxtPrint">Imprimir / PDF</span>
+                    </button>
+                    <button onclick="cerrarContrato()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs px-3 py-2.5 rounded-xl transition flex-1 sm:flex-initial text-center"><span id="btnTxtClose">Cerrar</span></button>
                 </div>
             </div>
 
-            <!-- DOCUMENTO LEGAL COMPLETO -->
-            <div id="seccionContrato" class="space-y-4 text-xs sm:text-sm leading-relaxed font-serif">
-                <div class="text-center border-b-2 border-slate-900 pb-3">
-                    <h2 class="text-base sm:text-lg font-bold uppercase tracking-wider">Seminuevos Beltrán</h2>
-                    <p class="text-xs font-sans font-bold text-slate-700 uppercase mt-0.5">Contrato de Compra-Venta y Carta Responsiva Vehicular</p>
-                    <p class="text-[11px] font-sans text-slate-600 mt-0.5">Culiacán, Sinaloa, México — Fecha de celebración: <span id="cFecha" class="font-bold underline"></span></p>
+            <!-- DOCUMENTO LEGAL -->
+            <div id="seccionContrato" class="space-y-3.5 text-xs sm:text-sm leading-relaxed font-serif">
+                <div class="text-center border-b-2 border-slate-900 pb-2.5">
+                    <h2 id="cNegocioTitulo" class="text-base sm:text-lg font-bold uppercase tracking-wider">Seminuevos Beltrán</h2>
+                    <p id="cSubHeader" class="text-xs font-sans font-bold text-slate-700 uppercase mt-0.5">Contrato de Compra-Venta y Carta Responsiva Vehicular</p>
+                    <p class="text-[11px] font-sans text-slate-700 mt-1">
+                        <span id="cLabelUbicacion">Culiacán, Sinaloa, México</span> — <span id="cLabelFechaTxt">Fecha de operación</span>: 
+                        <span id="cFecha" class="font-bold"></span>
+                    </p>
                 </div>
 
                 <!-- 1. DATOS DE LAS PARTES -->
-                <div class="space-y-1 text-xs">
-                    <h4 class="font-bold font-sans uppercase text-[11px] bg-slate-100 p-1 rounded">1. Datos Generales de las Partes</h4>
-                    <p><strong>EL VENDEDOR / ANTERIOR PROPIETARIO:</strong> <span id="cVendNombre" class="uppercase font-bold">________________________________________</span></p>
-                    <p><strong>Domicilio del Vendedor:</strong> <span id="cVendDir">__________________________________________________________________</span></p>
-                    <p><strong>Identificación / INE del Vendedor:</strong> <span id="cVendIne">________________________</span></p>
-                    <p class="pt-1"><strong>EL COMPRADOR:</strong> <span id="cCompNombre" class="uppercase font-bold">________________________________________</span></p>
-                    <p><strong>Domicilio del Comprador:</strong> <span id="cCompDir">__________________________________________________________________</span></p>
-                    <p><strong>Identificación (INE/Pasaporte):</strong> <span id="cCompIne">________________________</span> | <strong>Contacto:</strong> <span id="cCompContacto">________________________</span></p>
+                <div class="space-y-1.5 text-xs">
+                    <h4 id="cL1Title" class="font-bold font-sans uppercase text-[11px] bg-slate-100 p-1 rounded">1. Datos Generales de las Partes</h4>
+                    <p><strong id="cL1Vendedor">EL VENDEDOR / ANTERIOR PROPIETARIO:</strong> <span id="cVendNombre" class="uppercase font-bold"></span></p>
+                    <p><strong id="cL1VendDir">Domicilio del Vendedor:</strong> <span id="cVendDir"></span></p>
+                    <p><strong id="cL1VendIne">Identificación / INE:</strong> <span id="cVendIne"></span> &nbsp;|&nbsp; <strong id="cL1VendTelLbl">Teléfono:</strong> <span id="cVendTel"></span></p>
+                    
+                    <div class="pt-1.5 space-y-2 border-t border-slate-200 mt-2">
+                        <p><strong id="cL1Comprador">EL COMPRADOR:</strong> <span id="cCompNombre" class="uppercase font-bold"></span></p>
+                        <p><strong id="cL1CompDir">Domicilio del Comprador:</strong> <span id="cCompDir"></span></p>
+                        <p><strong id="cL1CompIne">Identificación Oficial / INE:</strong> <span id="cCompIne"></span> &nbsp;|&nbsp; <strong id="cL1Tel">Teléfono:</strong> <span id="cCompContacto"></span></p>
+                    </div>
                 </div>
 
                 <!-- 2. DATOS DE IDENTIFICACIÓN DEL VEHÍCULO -->
                 <div class="border border-slate-400 rounded-lg overflow-hidden font-sans my-2">
-                    <div class="bg-slate-100 font-bold p-1.5 text-[11px] border-b border-slate-400 uppercase tracking-wide">
+                    <div id="cL2Title" class="bg-slate-100 font-bold p-1 text-[11px] border-b border-slate-400 uppercase tracking-wide">
                         2. Datos de Identificación del Vehículo
                     </div>
-                    <div class="grid grid-cols-2 gap-2 p-2 text-xs">
-                        <div><strong>Marca / Submarca / Año:</strong> <span id="cAuto"></span></div>
-                        <div><strong>Número VIN (17 caracteres):</strong> <span id="cVin" class="font-mono"></span></div>
-                        <div><strong>No. de Serie del Motor:</strong> <span id="cMotor"></span></div>
-                        <div><strong>Placas de Circulación / Estado:</strong> <span id="cPlacas"></span></div>
-                        <div><strong>Folio Tarjeta de Circulación:</strong> <span id="cTarjeta"></span></div>
-                        <div><strong>Color (Exterior / Interior):</strong> <span id="cColor"></span></div>
-                        <div><strong>Kilometraje Actual:</strong> <span id="cKm"></span></div>
-                        <div><strong>Estado Documental:</strong> Factura en regla / Pedimento verificado</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-2 text-xs">
+                        <div><strong id="cL2Marca">Marca / Submarca / Año:</strong> <span id="cAuto"></span></div>
+                        <div><strong id="cL2Vin">Número VIN (17 caracteres):</strong> <span id="cVin" class="font-mono"></span></div>
+                        <div><strong id="cL2Motor">No. de Serie del Motor:</strong> <span id="cMotor"></span></div>
+                        <div><strong id="cL2Placas">Placas de Circulación / Estado:</strong> <span id="cPlacas"></span></div>
+                        <div><strong id="cL2Tarjeta">Folio Tarjeta de Circulación:</strong> <span id="cTarjeta"></span></div>
+                        <div><strong id="cL2Color">Color (Exterior / Interior):</strong> <span id="cColor"></span></div>
+                        <div><strong id="cL2Km">Kilometraje Actual:</strong> <span id="cKm"></span></div>
+                        <div class="col-span-1 sm:col-span-2 pt-1 border-t border-slate-300">
+                            <strong id="cL2Doc">Estado Documental:</strong> <span id="cL2DocVal" class="font-bold"></span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 3. CONDICIONES ECONÓMICAS Y DE PAGO -->
-                <div class="space-y-1 text-xs">
-                    <h4 class="font-bold font-sans uppercase text-[11px] bg-slate-100 p-1 rounded">3. Condiciones Económicas y de Pago</h4>
-                    <p>El precio total de compra-venta acordado por el vehículo es de <strong id="cPrecio"></strong> en moneda nacional (MXN).</p>
-                    <p><strong>Forma de Pago y Referencias:</strong> <span id="cFormaPago">____________________________________________________</span></p>
+                <div class="space-y-1.5 text-xs">
+                    <h4 id="cL3Title" class="font-bold font-sans uppercase text-[11px] bg-slate-100 p-1 rounded">3. Condiciones Económicas y de Pago</h4>
+                    <p><span id="cL3Txt1">El precio total de compra-venta acordado por el vehículo es de</span> <span id="cPrecio" class="font-bold"></span> <span id="cL3Txt2">en moneda nacional (MXN)</span>.</p>
+                    <p><strong id="cL3Pago">Forma de Pago y Referencias:</strong> <span id="cFormaPago"></span></p>
                 </div>
 
-                <!-- 4. SITUACIÓN LEGAL E HISTORIAL (CLÁUSULAS DE GARANTÍA) -->
+                <!-- 4. SITUACIÓN LEGAL E HISTORIAL -->
                 <div class="space-y-1 text-xs">
-                    <h4 class="font-bold font-sans uppercase text-[11px] bg-slate-100 p-1 rounded">4. Situación Legal e Historial (Cláusulas)</h4>
-                    <p><strong>PRIMERA (Propiedad y Legalidad):</strong> El vendedor declara que el vehículo objeto de este contrato es de su legal propiedad, encontrándose libre de gravámenes, multas, adeudos de tenencias, refrendos y con sus pedimentos de importación debidamente acreditados en caso de ser de procedencia extranjera.</p>
-                    <p><strong>SEGUNDA (Condición "As-Is"):</strong> <strong>"EL COMPRADOR"</strong> manifiesta haber inspeccionado el vehículo física, mecánica y documentalmente a su entera satisfacción, aceptándolo en el estado de uso en que se encuentra en este momento.</p>
+                    <h4 id="cL4Title" class="font-bold font-sans uppercase text-[11px] bg-slate-100 p-1 rounded">4. Situación Legal e Historial (Cláusulas)</h4>
+                    <p><strong id="cL4C1">PRIMERA (Propiedad y Legalidad):</strong> <span id="cL4C1Txt">El vendedor declara que el vehículo objeto de este contrato es de su legal propiedad, encontrándose libre de gravámenes, multas, adeudos de tenencias, refrendos y con sus pedimentos de importación debidamente acreditados en caso de ser de procedencia extranjera.</span></p>
+                    <p><strong id="cL4C2">SEGUNDA (Estado físico y mecánico):</strong> <span id="cL4C2Txt">"EL COMPRADOR" manifiesta haber inspeccionado y probado el vehículo física, mecánica y documentalmente a su entera satisfacción, aceptándolo tal como se encuentra en este momento, sin garantía posterior por uso o desgaste.</span></p>
                 </div>
 
                 <!-- 5. ENTREGA Y TRANSMISIÓN DE RESPONSABILIDAD -->
                 <div class="space-y-1 text-xs">
-                    <h4 class="font-bold font-sans uppercase text-[11px] bg-slate-100 p-1 rounded">5. Entrega y Transmisión de Responsabilidad</h4>
-                    <p><strong>TERCERA (Deslinde de Responsabilidad Civil y Penal):</strong> A partir de la fecha y hora de la entrega física del vehículo y su documentación, <strong>"EL COMPRADOR"</strong> asume de manera absoluta la responsabilidad civil, penal, administrativa y de tránsito derivada del uso, manejo o posesión del automóvil, deslindando totalmente al negocio y al anterior propietario de cualquier infracción, adeudo o incidente posterior.</p>
+                    <h4 id="cL5Title" class="font-bold font-sans uppercase text-[11px] bg-slate-100 p-1 rounded">5. Entrega y Transmisión de Responsabilidad</h4>
+                    <p><strong id="cL5C3">TERCERA (Entrega y Deslinde Civil/Penal):</strong> <span id="cL5C3Txt">En este acto se realiza la entrega material del vehículo, sus llaves y su documentación correspondiente. A partir de este momento, "EL COMPRADOR" asume de manera absoluta la responsabilidad civil, penal, administrativa y de tránsito derivada del uso, manejo o posesión del automóvil, deslindando totalmente al negocio y al anterior propietario de cualquier incidente posterior.</span></p>
                 </div>
 
                 <!-- 6. CIERRE Y FIRMAS -->
-                <div class="grid grid-cols-2 gap-8 pt-8 font-sans text-xs text-center">
+                <div class="grid grid-cols-2 gap-4 sm:gap-8 pt-8 font-sans text-xs text-center">
                     <div class="border-t border-slate-900 pt-2">
-                        <p class="font-bold uppercase text-[11px]" id="firmVendedor">_______________________________</p>
-                        <p class="text-slate-500 text-[10px]">"EL VENDEDOR / PROPIETARIO"</p>
-                        <p class="text-[9px] text-slate-400 mt-3">Firma y Sello</p>
+                        <p class="font-bold uppercase text-[11px] truncate" id="firmVendedor"></p>
+                        <p id="firmTxtVend" class="text-slate-500 text-[10px]">"EL VENDEDOR / PROPIETARIO"</p>
+                        <p class="text-[9px] text-slate-400 mt-2">Firma y Sello</p>
                     </div>
                     <div class="border-t border-slate-900 pt-2">
-                        <p class="font-bold uppercase text-[11px]" id="firmComprador">_______________________________</p>
-                        <p class="text-slate-500 text-[10px]">"EL COMPRADOR"</p>
-                        <p class="text-[9px] text-slate-400 mt-3">Firma y Huella</p>
+                        <p class="font-bold uppercase text-[11px] min-h-[16px] truncate" id="firmComprador"></p>
+                        <p id="firmTxtComp" class="text-slate-500 text-[10px]">"EL COMPRADOR" (Nombre y Firma)</p>
+                        <p class="text-[9px] text-slate-400 mt-2">Firma y Huella</p>
                     </div>
                 </div>
             </div>
@@ -362,7 +459,186 @@
 
         let autos = JSON.parse(localStorage.getItem('autos_db')) || [];
         let gastosFijos = JSON.parse(localStorage.getItem('gastos_fijos_db')) || [];
+        let nombreNegocio = localStorage.getItem('nombre_negocio_db') || 'Seminuevos Beltrán';
         let estadoFiltroActual = 'Todos';
+        let idiomaActual = 'es';
+        let autoEnContratoActual = null;
+
+        document.getElementById('nombreNegocioTxt').textContent = nombreNegocio;
+        document.getElementById('pageTitle').textContent = `${nombreNegocio} - Control y Gestión`;
+
+        function cambiarNombreNegocio() {
+            const nuevoNombre = prompt(idiomaActual === 'en' ? "Enter new business name:" : "Ingresa el nuevo nombre para tu negocio/lote:", nombreNegocio);
+            if (!nuevoNombre || !nuevoNombre.trim()) return;
+            nombreNegocio = nuevoNombre.trim();
+            localStorage.setItem('nombre_negocio_db', nombreNegocio);
+            document.getElementById('nombreNegocioTxt').textContent = nombreNegocio;
+            document.getElementById('pageTitle').textContent = `${nombreNegocio} - Control y Gestión`;
+        }
+
+        function toggleFormularioRegistro() {
+            const contenedor = document.getElementById('contenedorFormulario');
+            const btnToggle = document.getElementById('btnToggleForm');
+            if (contenedor.classList.contains('hidden')) {
+                contenedor.classList.remove('hidden');
+                btnToggle.classList.add('hidden');
+            } else {
+                contenedor.classList.add('hidden');
+                btnToggle.classList.remove('hidden');
+            }
+        }
+
+        function cambiarIdioma(lang) {
+            idiomaActual = lang;
+            document.getElementById('langEs').className = lang === 'es' ? "px-2.5 py-1.5 rounded-lg font-bold bg-amber-500 text-slate-950 transition" : "px-2.5 py-1.5 rounded-lg font-bold text-slate-400 hover:text-white transition";
+            document.getElementById('langEn').className = lang === 'en' ? "px-2.5 py-1.5 rounded-lg font-bold bg-amber-500 text-slate-950 transition" : "px-2.5 py-1.5 rounded-lg font-bold text-slate-400 hover:text-white transition";
+            
+            aplicarTraduccionesInterfaz();
+            render();
+        }
+
+        function aplicarTraduccionesInterfaz() {
+            if (idiomaActual === 'en') {
+                document.getElementById('txtSubHeader').textContent = "Professional financial control, inventory, expenses and bills of sale";
+                document.getElementById('btnBackup').innerHTML = `<i class="fa-solid fa-download text-amber-400"></i> Backup`;
+                document.getElementById('txtRestore').textContent = "Restore";
+                document.getElementById('optTodosMeses').textContent = "📅 All Months";
+
+                document.getElementById('m1Title').textContent = "Total Investment";
+                document.getElementById('m1Sub').textContent = "Purchases + Car Expenses";
+                document.getElementById('m2Title').textContent = "Total Sales";
+                document.getElementById('m2Sub').textContent = "Revenue from Sold Units";
+                document.getElementById('m3Title').textContent = "Fixed / Business Expenses";
+                document.getElementById('m3Btn').textContent = "+ Register Expense";
+                document.getElementById('m4Title').textContent = "Net Real Profit";
+                document.getElementById('m4Sub').textContent = "Sales - Costs - Expenses";
+                document.getElementById('m5Title').textContent = "In Stock / Turnover";
+
+                document.getElementById('txtBtnToggle').textContent = "Register New Vehicle";
+                document.getElementById('txtCloseForm').textContent = "Close";
+                document.getElementById('fRegTitle').innerHTML = `<i class="fa-solid fa-square-plus text-amber-400"></i> Register New Vehicle`;
+                document.getElementById('fLblAuto').textContent = "Vehicle (Make, Model, Year)*";
+                document.getElementById('fLblVin').textContent = "VIN / Serial Number (17 chars)*";
+                document.getElementById('fLblCompra').textContent = "Purchase Price ($)*";
+                document.getElementById('fLblFechaC').textContent = "Purchase Date*";
+                document.getElementById('fLblVend').textContent = "Seller / Supplier (Name)*";
+                document.getElementById('fLblVendDir').textContent = "Seller Address";
+                document.getElementById('fLblVendIne').textContent = "Seller ID / Passport";
+                document.getElementById('fLblVendTel').textContent = "Seller Phone";
+                document.getElementById('fLblKmReg').textContent = "Current Mileage";
+                document.getElementById('fLblFoto').innerHTML = `<i class="fa-solid fa-camera text-amber-400"></i> Photo / Image URL`;
+                document.getElementById('fLblLocalFoto').textContent = "Or Upload Gallery Photo";
+                document.getElementById('fBtnSubmit').textContent = "+ Register Vehicle";
+
+                document.getElementById('btnEstadoTodos').textContent = "All";
+                document.getElementById('btnEstadoDisponible').textContent = "Available";
+                document.getElementById('btnEstadoVendido').textContent = "Sold";
+                document.getElementById('searchInput').placeholder = "Search vehicle, VIN, client...";
+                document.getElementById('optReciente').textContent = "Most Recent";
+                document.getElementById('optDias').textContent = "Longest in Stock";
+                document.getElementById('optInv').textContent = "Highest Investment";
+
+                document.getElementById('editModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Edit Vehicle Details`;
+                document.getElementById('eLblAuto').textContent = "Vehicle (Make, Model, Year)*";
+                document.getElementById('eLblVin').textContent = "VIN / Serial*";
+                document.getElementById('eLblPrecio').textContent = "Purchase Price ($)*";
+                document.getElementById('eLblFecha').textContent = "Purchase Date*";
+                document.getElementById('eLblVend').textContent = "Seller / Supplier";
+                document.getElementById('eLblVendIne').textContent = "Seller ID / Passport";
+                document.getElementById('eLblVendTel').textContent = "Seller Phone";
+                document.getElementById('eLblKm').textContent = "Mileage";
+                document.getElementById('eBtnSave').textContent = "Save Changes";
+                document.getElementById('eBtnCancel').textContent = "Cancel";
+
+                document.getElementById('vModalTitle').innerHTML = `<i class="fa-solid fa-file-contract"></i> Sale Details & Bill of Sale`;
+                document.getElementById('vSec1Title').innerHTML = `<i class="fa-solid fa-user-check"></i> 1. General Buyer Information`;
+                document.getElementById('vLblNombre').textContent = "Buyer Full Name*";
+                document.getElementById('vLblDir').textContent = "Full Address (Street, City, State)";
+                document.getElementById('vLblIne').textContent = "Official ID / Passport Number";
+                document.getElementById('vLblTel').textContent = "Buyer Phone Number";
+                document.getElementById('vLblCorreo').textContent = "Email (Optional)";
+                document.getElementById('vSec2Title').innerHTML = `<i class="fa-solid fa-car"></i> 2. Specific Technical Data for Bill of Sale`;
+                document.getElementById('vLblMotor').textContent = "Engine Serial Number";
+                document.getElementById('vLblPlacas').textContent = "Current Plates & State";
+                document.getElementById('vLblTarjeta').textContent = "Registration Folio / Card";
+                document.getElementById('vLblColor').textContent = "Exterior / Interior Color";
+                document.getElementById('vLblKm').textContent = "Current Mileage";
+                document.getElementById('vLblPago').textContent = "Payment Method / Reference";
+                document.getElementById('vLblPrecioFin').innerHTML = `<i class="fa-solid fa-tag"></i> Final Sale Price ($)*`;
+                document.getElementById('vBtnConfirm').textContent = "Confirm Sale & Generate Bill of Sale";
+                document.getElementById('vBtnCancel').textContent = "Cancel";
+
+            } else {
+                document.getElementById('txtSubHeader').textContent = "Control financiero profesional, inventario, gastos y contratos";
+                document.getElementById('btnBackup').innerHTML = `<i class="fa-solid fa-download text-amber-400"></i> Respaldar`;
+                document.getElementById('txtRestore').textContent = "Restaurar";
+                document.getElementById('optTodosMeses').textContent = "📅 Todos los Meses";
+
+                document.getElementById('m1Title').textContent = "Inversión Total";
+                document.getElementById('m1Sub').textContent = "Compras + Gastos Auto";
+                document.getElementById('m2Title').textContent = "Ventas Totales";
+                document.getElementById('m2Sub').textContent = "Ingreso de Vendidos";
+                document.getElementById('m3Title').textContent = "Gastos Fijos/Negocio";
+                document.getElementById('m3Btn').textContent = "+ Registrar Gasto";
+                document.getElementById('m4Title').textContent = "Ganancia Libre Real";
+                document.getElementById('m4Sub').textContent = "Ventas - Costos - Fijos";
+                document.getElementById('m5Title').textContent = "En Piso / Rotación";
+
+                document.getElementById('txtBtnToggle').textContent = "Registrar Nuevo Vehículo";
+                document.getElementById('txtCloseForm').textContent = "Cerrar";
+                document.getElementById('fRegTitle').innerHTML = `<i class="fa-solid fa-square-plus text-amber-400"></i> Registrar Nuevo Vehículo`;
+                document.getElementById('fLblAuto').textContent = "Auto (Marca, Submarca, Año)*";
+                document.getElementById('fLblVin').textContent = "VIN / Número de Serie (17 car)*";
+                document.getElementById('fLblCompra').textContent = "Precio de Compra ($)*";
+                document.getElementById('fLblFechaC').textContent = "Fecha de Compra*";
+                document.getElementById('fLblVend').textContent = "Vendedor / Proveedor (Nombre)*";
+                document.getElementById('fLblVendDir').textContent = "Domicilio del Vendedor";
+                document.getElementById('fLblVendIne').textContent = "INE / Identificación Vendedor";
+                document.getElementById('fLblVendTel').textContent = "Teléfono del Vendedor";
+                document.getElementById('fLblKmReg').textContent = "Kilometraje Actual";
+                document.getElementById('fLblFoto').innerHTML = `<i class="fa-solid fa-camera text-amber-400"></i> Foto / URL de Imagen`;
+                document.getElementById('fLblLocalFoto').textContent = "O subir Foto de Galería";
+                document.getElementById('fBtnSubmit').textContent = "+ Registrar Auto";
+
+                document.getElementById('btnEstadoTodos').textContent = "Todos";
+                document.getElementById('btnEstadoDisponible').textContent = "Disponibles";
+                document.getElementById('btnEstadoVendido').textContent = "Vendidos";
+                document.getElementById('searchInput').placeholder = "Buscar auto, VIN, cliente...";
+                document.getElementById('optReciente').textContent = "Más Reciente";
+                document.getElementById('optDias').textContent = "Mayor Tiempo en Piso";
+                document.getElementById('optInv').textContent = "Mayor Inversión";
+
+                document.getElementById('editModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editar Datos del Vehículo`;
+                document.getElementById('eLblAuto').textContent = "Auto (Marca, Submarca, Año)*";
+                document.getElementById('eLblVin').textContent = "VIN / Serie*";
+                document.getElementById('eLblPrecio').textContent = "Precio de Compra ($)*";
+                document.getElementById('eLblFecha').textContent = "Fecha de Compra*";
+                document.getElementById('eLblVend').textContent = "Vendedor / Proveedor";
+                document.getElementById('eLblVendIne').textContent = "INE / Identificación Vendedor";
+                document.getElementById('eLblVendTel').textContent = "Teléfono Vendedor";
+                document.getElementById('eLblKm').textContent = "Kilometraje";
+                document.getElementById('eBtnSave').textContent = "Guardar Cambios";
+                document.getElementById('eBtnCancel').textContent = "Cancelar";
+
+                document.getElementById('vModalTitle').innerHTML = `<i class="fa-solid fa-file-contract"></i> Datos de Venta y Contrato`;
+                document.getElementById('vSec1Title').innerHTML = `<i class="fa-solid fa-user-check"></i> 1. Datos Generales del Comprador`;
+                document.getElementById('vLblNombre').textContent = "Nombre Completo del Comprador*";
+                document.getElementById('vLblDir').textContent = "Domicilio Completo (Calle, Col, C.P., Ciudad)";
+                document.getElementById('vLblIne').textContent = "Identificación Oficial / INE (Folio)";
+                document.getElementById('vLblTel').textContent = "Teléfono del Comprador";
+                document.getElementById('vLblCorreo').textContent = "Correo Electrónico (Opcional)";
+                document.getElementById('vSec2Title').innerHTML = `<i class="fa-solid fa-car"></i> 2. Datos Técnicos Específicos del Vehículo para Contrato`;
+                document.getElementById('vLblMotor').textContent = "No. de Serie del Motor";
+                document.getElementById('vLblPlacas').textContent = "Placas Actuales y Estado";
+                document.getElementById('vLblTarjeta').textContent = "No. Folio Tarjeta Circulación";
+                document.getElementById('vLblColor').textContent = "Color Exterior e Interior";
+                document.getElementById('vLblKm').textContent = "Kilometraje Actual";
+                document.getElementById('vLblPago').textContent = "Forma de Pago / Referencia";
+                document.getElementById('vLblPrecioFin').innerHTML = `<i class="fa-solid fa-tag"></i> Precio Final de Venta ($)*`;
+                document.getElementById('vBtnConfirm').textContent = "Confirmar Venta y Generar Contrato";
+                document.getElementById('vBtnCancel').textContent = "Cancelar";
+            }
+        }
 
         function guardarDatos() {
             localStorage.setItem('autos_db', JSON.stringify(autos));
@@ -389,18 +665,23 @@
                 vendedorInfo: document.getElementById('vendedorInfo').value.trim(),
                 vendedorDir: document.getElementById('vendedorDir').value.trim() || 'Culiacán, Sin.',
                 vendedorIne: document.getElementById('vendedorIne').value.trim() || 'N/A',
+                vendedorTel: document.getElementById('vendedorTel').value.trim() || 'N/A',
+                vendedorKm: document.getElementById('vendedorKm').value.trim() || 'N/A',
                 imagen: finalImage,
                 precioVenta: 0,
                 fechaVenta: '',
-                estado: 'Disponible',
+                estado: idiomaActual === 'en' ? 'Available' : 'Disponible',
                 gastos: [],
-                docs: { factura: false, pedimento: false, tenencias: false, multas: false, bajaPlacas: false, placasActuales: false },
-                legal: { compradorNombre: '', compradorContacto: '', compradorDireccion: '', compradorIne: '', motor: '', placas: '', tarjeta: '', color: '', km: '', formaPago: '' }
+                docs: idiomaActual === 'en' 
+                    ? { cleanTitle: false, salvageTitle: false, rebuiltTitle: false, pedimento: false }
+                    : { factura: false, pedimento: false, tenencias: false, multas: false, bajaPlacas: false, placasActuales: false },
+                legal: { compradorNombre: '', compradorTel: '', compradorDireccion: '', compradorIne: '', compradorCorreo: '', motor: '', placas: '', tarjeta: '', color: '', km: document.getElementById('vendedorKm').value.trim(), formaPago: '', pendienteNota: '' }
             };
 
             autos.push(nuevoAuto);
             document.getElementById('carForm').reset();
             document.getElementById('fechaCompra').value = new Date().toISOString().split('T')[0];
+            toggleFormularioRegistro();
             guardarDatos();
         });
 
@@ -413,6 +694,9 @@
             document.getElementById('editPrecioCompra').value = auto.precioCompra;
             document.getElementById('editFechaCompra').value = auto.fechaCompra || '';
             document.getElementById('editVendedor').value = auto.vendedorInfo || '';
+            document.getElementById('editVendedorIne').value = auto.vendedorIne || '';
+            document.getElementById('editVendedorTel').value = auto.vendedorTel || '';
+            document.getElementById('editKm').value = auto.vendedorKm || auto.legal?.km || '';
             document.getElementById('modalEditar').classList.remove('hidden');
         }
 
@@ -429,6 +713,11 @@
             auto.precioCompra = parseFloat(document.getElementById('editPrecioCompra').value) || 0;
             auto.fechaCompra = document.getElementById('editFechaCompra').value;
             auto.vendedorInfo = document.getElementById('editVendedor').value.trim();
+            auto.vendedorIne = document.getElementById('editVendedorIne').value.trim();
+            auto.vendedorTel = document.getElementById('editVendedorTel').value.trim();
+            auto.vendedorKm = document.getElementById('editKm').value.trim();
+            if (!auto.legal) auto.legal = {};
+            auto.legal.km = auto.vendedorKm;
 
             cerrarModalEditar();
             guardarDatos();
@@ -440,16 +729,18 @@
 
             document.getElementById('ventaAutoId').value = auto.id;
             document.getElementById('vPrecioVenta').value = auto.precioVenta || '';
-            document.getElementById('vFormaPago').value = auto.legal?.formaPago || 'Efectivo / Transferencia';
+            document.getElementById('vPendienteNota').value = auto.legal?.pendienteNota || '';
+            document.getElementById('vFormaPago').value = auto.legal?.formaPago || (idiomaActual === 'en' ? 'Cash / Wire Transfer' : 'Efectivo / Transferencia');
             document.getElementById('vCompradorNombre').value = auto.legal?.compradorNombre || auto.compradorInfo || '';
-            document.getElementById('vCompradorContacto').value = auto.legal?.compradorContacto || '';
+            document.getElementById('vCompradorTel').value = auto.legal?.compradorTel || '';
             document.getElementById('vCompradorDireccion').value = auto.legal?.compradorDireccion || '';
             document.getElementById('vCompradorIne').value = auto.legal?.compradorIne || '';
+            document.getElementById('vCompradorCorreo').value = auto.legal?.compradorCorreo || '';
             document.getElementById('vMotor').value = auto.legal?.motor || '';
             document.getElementById('vPlacas').value = auto.legal?.placas || '';
             document.getElementById('vTarjeta').value = auto.legal?.tarjeta || '';
             document.getElementById('vColor').value = auto.legal?.color || '';
-            document.getElementById('vKm').value = auto.legal?.km || '';
+            document.getElementById('vKm').value = auto.legal?.km || auto.vendedorKm || '';
 
             document.getElementById('modalVenta').classList.remove('hidden');
         }
@@ -463,25 +754,26 @@
             if (!auto) return;
 
             const precio = parseFloat(document.getElementById('vPrecioVenta').value) || 0;
-            const compNombre = document.getElementById('vCompradorNombre').value.trim().toUpperCase() || 'CLIENTE CONTADO';
+            const compNombre = document.getElementById('vCompradorNombre').value.trim().toUpperCase() || (idiomaActual === 'en' ? 'CASH BUYER' : 'CLIENTE CONTADO');
 
             auto.precioVenta = precio;
             auto.fechaVenta = new Date().toISOString().split('T')[0];
-            auto.estado = 'Vendido';
+            auto.estado = idiomaActual === 'en' ? 'Sold' : 'Vendido';
             auto.compradorInfo = compNombre;
 
-            auto.legal = {
-                compradorNombre: compNombre,
-                compradorContacto: document.getElementById('vCompradorContacto').value.trim(),
-                compradorDireccion: document.getElementById('vCompradorDireccion').value.trim(),
-                compradorIne: document.getElementById('vCompradorIne').value.trim(),
-                motor: document.getElementById('vMotor').value.trim().toUpperCase(),
-                placas: document.getElementById('vPlacas').value.trim().toUpperCase(),
-                tarjeta: document.getElementById('vTarjeta').value.trim(),
-                color: document.getElementById('vColor').value.trim(),
-                km: document.getElementById('vKm').value.trim(),
-                formaPago: document.getElementById('vFormaPago').value.trim()
-            };
+            if (!auto.legal) auto.legal = {};
+            auto.legal.compradorNombre = compNombre;
+            auto.legal.compradorTel = document.getElementById('vCompradorTel').value.trim();
+            auto.legal.compradorDireccion = document.getElementById('vCompradorDireccion').value.trim();
+            auto.legal.compradorIne = document.getElementById('vCompradorIne').value.trim();
+            auto.legal.compradorCorreo = document.getElementById('vCompradorCorreo').value.trim();
+            auto.legal.motor = document.getElementById('vMotor').value.trim().toUpperCase();
+            auto.legal.placas = document.getElementById('vPlacas').value.trim().toUpperCase();
+            auto.legal.tarjeta = document.getElementById('vTarjeta').value.trim();
+            auto.legal.color = document.getElementById('vColor').value.trim();
+            auto.legal.km = document.getElementById('vKm').value.trim();
+            auto.legal.formaPago = document.getElementById('vFormaPago').value.trim();
+            auto.legal.pendienteNota = document.getElementById('vPendienteNota').value.trim();
 
             cerrarModalVenta();
             guardarDatos();
@@ -509,9 +801,9 @@
         }
 
         function agregarGastoOperativo() {
-            const concepto = prompt("Concepto del gasto del negocio (Ej. Renta de lote, Publicidad Facebook/TikTok, Luz):");
+            const concepto = prompt(idiomaActual === 'en' ? "Business expense concept (e.g., Lot rent, FB/TikTok Ads):" : "Concepto del gasto del negocio (Ej. Renta de lote, Publicidad Facebook/TikTok, Luz):");
             if (!concepto) return;
-            const monto = parseFloat(prompt("Monto ($):"));
+            const monto = parseFloat(prompt(idiomaActual === 'en' ? "Amount ($):" : "Monto ($):"));
             if (isNaN(monto) || monto <= 0) return;
 
             gastosFijos.push({ id: Date.now(), concepto, monto, fecha: new Date().toISOString().split('T')[0] });
@@ -533,9 +825,9 @@
         }
 
         function agregarGasto(autoId) {
-            const concepto = prompt("Concepto del gasto (Ej. Grúa, Detallado, Mecánico):");
+            const concepto = prompt(idiomaActual === 'en' ? "Expense concept (e.g., Towing, Detailing, Mechanic):" : "Concepto del gasto (Ej. Grúa, Detallado, Mecánico):");
             if (!concepto) return;
-            const monto = parseFloat(prompt("Monto ($):"));
+            const monto = parseFloat(prompt(idiomaActual === 'en' ? "Amount ($):" : "Monto ($):"));
             if (isNaN(monto) || monto <= 0) return;
             autos.find(a => a.id === autoId).gastos.push({ concepto, monto });
             guardarDatos();
@@ -545,72 +837,227 @@
 
         function toggleDoc(autoId, docKey) {
             const auto = autos.find(a => a.id === autoId);
-            if (!auto.docs) auto.docs = { factura: false, pedimento: false, tenencias: false, multas: false, bajaPlacas: false, placasActuales: false };
+            if (!auto.docs) {
+                auto.docs = idiomaActual === 'en' 
+                    ? { cleanTitle: false, salvageTitle: false, rebuiltTitle: false, pedimento: false }
+                    : { factura: false, pedimento: false, tenencias: false, multas: false, bajaPlacas: false, placasActuales: false };
+            }
             auto.docs[docKey] = !auto.docs[docKey];
             guardarDatos();
         }
 
         function marcarDisponible(autoId) {
             const auto = autos.find(a => a.id === autoId);
-            auto.estado = 'Disponible'; auto.fechaVenta = '';
+            auto.estado = idiomaActual === 'en' ? 'Available' : 'Disponible'; 
+            auto.fechaVenta = '';
+            if (auto.legal) auto.legal.pendienteNota = '';
             guardarDatos();
         }
 
         function eliminarAuto(autoId) {
-            if (confirm("¿Eliminar este auto?")) { autos = autos.filter(a => a.id !== autoId); guardarDatos(); }
+            if (confirm(idiomaActual === 'en' ? "Delete this vehicle?" : "¿Eliminar este auto?")) { autos = autos.filter(a => a.id !== autoId); guardarDatos(); }
         }
 
         function generarContrato(autoId) {
             const auto = autos.find(a => a.id === autoId);
             if (!auto) return;
+            autoEnContratoActual = auto;
 
-            if (auto.estado !== 'Vendido' || !auto.legal || !auto.legal.compradorNombre) {
-                alert("Por favor registra primero los datos de venta y del comprador haciendo clic en 'Vender'.");
-                abrirModalVenta(autoId);
-                return;
+            const l = auto.legal || {};
+            const d = auto.docs || {};
+            const esVendido = (auto.estado === 'Vendido' || auto.estado === 'Sold') && l.compradorNombre;
+
+            let tituloStr = "";
+            if (idiomaActual === 'en') {
+                let statusList = [];
+                if (d.cleanTitle) statusList.push("Clean Title");
+                if (d.salvageTitle) statusList.push("Salvage Title");
+                if (d.rebuiltTitle) statusList.push("Rebuilt Title");
+                if (d.pedimento) statusList.push("Import Doc");
+                tituloStr = statusList.length > 0 ? statusList.join(" / ") : "Clear Title / Verified Import";
+            } else {
+                let statusList = [];
+                if (d.factura) statusList.push("Factura en regla");
+                if (d.pedimento) statusList.push("Pedimento");
+                if (d.tenencias) statusList.push("Tenencias pagadas");
+                if (d.multas) statusList.push("Sin multas");
+                if (d.bajaPlacas) statusList.push("Baja de placas");
+                if (d.placasActuales) statusList.push("Placas actuales");
+                tituloStr = statusList.length > 0 ? statusList.join(" / ") : "Documentación en regla";
             }
 
-            const fechaHoy = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-            const l = auto.legal;
+            if (idiomaActual === 'en') {
+                document.getElementById('cTituloPrincipal').textContent = `Official Bill of Sale - ${nombreNegocio}`;
+                document.getElementById('subtituloModalContrato').textContent = esVendido ? "Completed document with registered sale details." : "Print-ready blank form for manual completion.";
+                document.getElementById('btnTxtPrint').textContent = "Print / PDF";
+                document.getElementById('btnTxtClose').textContent = "Close";
+                document.getElementById('cSubHeader').textContent = "Vehicle Bill of Sale & Liability Release";
+                document.getElementById('cLabelUbicacion').textContent = "Culiacán, Sinaloa, Mexico";
+                document.getElementById('cLabelFechaTxt').textContent = "Date of Sale";
 
-            document.getElementById('cFecha').textContent = fechaHoy;
-            
-            // Datos del Vendedor
-            document.getElementById('cVendNombre').textContent = auto.vendedorInfo || 'Seminuevos Beltrán';
+                document.getElementById('cL1Title').textContent = "1. General Parties Information";
+                document.getElementById('cL1Vendedor').textContent = "SELLER / PREVIOUS OWNER:";
+                document.getElementById('cL1VendDir').textContent = "Seller Address:";
+                document.getElementById('cL1VendIne').textContent = "Seller ID / Passport:";
+                document.getElementById('cL1VendTelLbl').textContent = "Phone:";
+                document.getElementById('cL1Comprador').textContent = "BUYER:";
+                document.getElementById('cL1CompDir').textContent = "Buyer Address:";
+                document.getElementById('cL1CompIne').textContent = "Buyer ID / Passport:";
+                document.getElementById('cL1Tel').textContent = "Phone:";
+
+                document.getElementById('cL2Title').textContent = "2. Vehicle Identification Data";
+                document.getElementById('cL2Marca').textContent = "Make / Model / Year:";
+                document.getElementById('cL2Vin').textContent = "VIN Number (17 chars):";
+                document.getElementById('cL2Motor').textContent = "Engine Serial Number:";
+                document.getElementById('cL2Placas').textContent = "License Plates / State:";
+                document.getElementById('cL2Tarjeta').textContent = "Registration Folio:";
+                document.getElementById('cL2Color').textContent = "Color (Exterior / Interior):";
+                document.getElementById('cL2Km').textContent = "Current Mileage:";
+                document.getElementById('cL2Doc').textContent = "Document / Title Status:";
+
+                document.getElementById('cL3Title').textContent = "3. Economic & Payment Conditions";
+                document.getElementById('cL3Txt1').textContent = "The total agreed purchase price for the vehicle is";
+                document.getElementById('cL3Txt2').textContent = "in national currency (MXN)";
+                document.getElementById('cL3Pago').textContent = "Payment Method & References:";
+
+                document.getElementById('cL4Title').textContent = "4. Legal Status & History (Clauses)";
+                document.getElementById('cL4C1').textContent = "FIRST (Ownership & Legality):";
+                document.getElementById('cL4C1Txt').textContent = "The seller declares that the vehicle subject to this agreement is their lawful property, free of liens, fines, and with proper import documentation if applicable.";
+                document.getElementById('cL4C2').textContent = "SECOND (As-Is Condition):";
+                document.getElementById('cL4C2Txt').textContent = "\"THE BUYER\" acknowledges having inspected and tested the vehicle physically, mechanically, and clerically to their entire satisfaction, accepting it \"AS-IS\" in its current condition.";
+
+                document.getElementById('cL5Title').textContent = "5. Delivery & Release of Liability";
+                document.getElementById('cL5C3').textContent = "THIRD (Delivery & Civil/Criminal Release):";
+                document.getElementById('cL5C3Txt').textContent = "Physical delivery of the vehicle, keys, and documents takes place herein. As of this moment, \"THE BUYER\" assumes full civil, criminal, administrative, and traffic liability derived from the use or possession of the vehicle, totally releasing the business and previous owner from any subsequent incident.";
+
+                document.getElementById('firmTxtVend').textContent = "\"SELLER / OWNER\"";
+                document.getElementById('firmTxtComp').textContent = "\"BUYER\" (Name & Signature)";
+            } else {
+                document.getElementById('cTituloPrincipal').textContent = `Contrato Oficial - ${nombreNegocio}`;
+                document.getElementById('subtituloModalContrato').textContent = esVendido ? "Documento completo con los datos de venta registrados." : "Formato listo para imprimir con espacios en blanco para llenar a pluma.";
+                document.getElementById('btnTxtPrint').textContent = "Imprimir / PDF";
+                document.getElementById('btnTxtClose').textContent = "Cerrar";
+                document.getElementById('cSubHeader').textContent = "Contrato de Compra-Venta y Carta Responsiva Vehicular";
+                document.getElementById('cLabelUbicacion').textContent = "Culiacán, Sinaloa, México";
+                document.getElementById('cLabelFechaTxt').textContent = "Fecha de operación";
+
+                document.getElementById('cL1Title').textContent = "1. Datos Generales de las Partes";
+                document.getElementById('cL1Vendedor').textContent = "EL VENDEDOR / ANTERIOR PROPIETARIO:";
+                document.getElementById('cL1VendDir').textContent = "Domicilio del Vendedor:";
+                document.getElementById('cL1VendIne').textContent = "Identificación / INE:";
+                document.getElementById('cL1VendTelLbl').textContent = "Teléfono:";
+                document.getElementById('cL1Comprador').textContent = "EL COMPRADOR:";
+                document.getElementById('cL1CompDir').textContent = "Domicilio del Comprador:";
+                document.getElementById('cL1CompIne').textContent = "Identificación Oficial / INE:";
+                document.getElementById('cL1Tel').textContent = "Teléfono:";
+
+                document.getElementById('cL2Title').textContent = "2. Datos de Identificación del Vehículo";
+                document.getElementById('cL2Marca').textContent = "Marca / Submarca / Año:";
+                document.getElementById('cL2Vin').textContent = "Número VIN (17 caracteres):";
+                document.getElementById('cL2Motor').textContent = "No. de Serie del Motor:";
+                document.getElementById('cL2Placas').textContent = "Placas de Circulación / Estado:";
+                document.getElementById('cL2Tarjeta').textContent = "Folio Tarjeta de Circulación:";
+                document.getElementById('cL2Color').textContent = "Color (Exterior / Interior):";
+                document.getElementById('cL2Km').textContent = "Kilometraje Actual:";
+                document.getElementById('cL2Doc').textContent = "Estado Documental:";
+
+                document.getElementById('cL3Title').textContent = "3. Condiciones Económicas y de Pago";
+                document.getElementById('cL3Txt1').textContent = "El precio total de compra-venta acordado por el vehículo es de";
+                document.getElementById('cL3Txt2').textContent = "en moneda nacional (MXN)";
+                document.getElementById('cL3Pago').textContent = "Forma de Pago y Referencias:";
+
+                document.getElementById('cL4Title').textContent = "4. Situación Legal e Historial (Cláusulas)";
+                document.getElementById('cL4C1').textContent = "PRIMERA (Propiedad y Legalidad):";
+                document.getElementById('cL4C1Txt').textContent = "El vendedor declara que el vehículo objeto de este contrato es de su legal propiedad, encontrándose libre de gravámenes, multas, adeudos de tenencias, refrendos y con sus pedimentos de importación debidamente acreditados en caso de ser de procedencia extranjera.";
+                document.getElementById('cL4C2').textContent = "SEGUNDA (Estado físico y mecánico):";
+                document.getElementById('cL4C2Txt').textContent = "\"EL COMPRADOR\" manifiesta haber inspeccionado y probado el vehículo física, mecánica y documentalmente a su entera satisfacción, aceptándolo tal como se encuentra en este momento, sin garantía posterior por uso o desgaste.";
+
+                document.getElementById('cL5Title').textContent = "5. Entrega y Transmisión de Responsabilidad";
+                document.getElementById('cL5C3').textContent = "TERCERA (Entrega y Deslinde Civil/Penal):";
+                document.getElementById('cL5C3Txt').textContent = "En este acto se realiza la entrega material del vehículo, sus llaves y su documentación correspondiente. A partir de este momento, \"EL COMPRADOR\" asume de manera absoluta la responsabilidad civil, penal, administrativa y de tránsito derivada del uso, manejo o posesión del automóvil, deslindando totalmente al negocio y al anterior propietario de cualquier incidente posterior.";
+
+                document.getElementById('firmTxtVend').textContent = "\"EL VENDEDOR / PROPIETARIO\"";
+                document.getElementById('firmTxtComp').textContent = "\"EL COMPRADOR\" (Nombre y Firma)";
+            }
+
+            document.getElementById('cNegocioTitulo').textContent = nombreNegocio;
+            document.getElementById('cL2DocVal').textContent = tituloStr;
+
+            document.getElementById('cVendNombre').textContent = auto.vendedorInfo || nombreNegocio;
             document.getElementById('cVendDir').textContent = auto.vendedorDir || 'Culiacán, Sinaloa';
-            document.getElementById('cVendIne').textContent = auto.vendedorIne || 'N/A';
-            document.getElementById('firmVendedor').textContent = auto.vendedorInfo || 'Seminuevos Beltrán';
+            document.getElementById('cVendIne').textContent = auto.vendedorIne || '________________________';
+            document.getElementById('cVendTel').textContent = auto.vendedorTel || '________________________';
+            document.getElementById('firmVendedor').textContent = auto.vendedorInfo || nombreNegocio;
 
-            // Datos del Comprador
-            document.getElementById('cCompNombre').textContent = l.compradorNombre;
-            document.getElementById('cCompDir').textContent = l.compradorDireccion || 'Culiacán, Sinaloa';
-            document.getElementById('cCompIne').textContent = l.compradorIne || 'N/A';
-            document.getElementById('cCompContacto').textContent = l.compradorContacto || 'N/A';
-            document.getElementById('firmComprador').textContent = l.compradorNombre;
-
-            // Datos del Auto
             document.getElementById('cAuto').textContent = auto.nombre;
-            document.getElementById('cVin').textContent = auto.vin || 'N/A';
-            document.getElementById('cMotor').textContent = l.motor || 'N/A';
-            document.getElementById('cPlacas').textContent = l.placas || 'N/A';
-            document.getElementById('cTarjeta').textContent = l.tarjeta || 'N/A';
-            document.getElementById('cColor').textContent = l.color || 'N/A';
-            document.getElementById('cKm').textContent = l.km || 'N/A';
+            document.getElementById('cVin').textContent = auto.vin || '________________________';
+            document.getElementById('cMotor').textContent = l.motor || '________________________';
+            document.getElementById('cPlacas').textContent = l.placas || '________________________';
+            document.getElementById('cTarjeta').textContent = l.tarjeta || '________________________';
+            document.getElementById('cColor').textContent = l.color || '________________________';
+            document.getElementById('cKm').textContent = l.km || auto.vendedorKm || '________________________';
 
-            document.getElementById('cPrecio').textContent = `$${auto.precioVenta.toLocaleString('es-MX', {minimumFractionDigits: 2})} MXN`;
-            document.getElementById('cFormaPago').textContent = l.formaPago || 'Efectivo / Transferencia';
+            if (esVendido) {
+                const fechaTexto = auto.fechaVenta 
+                    ? new Date(auto.fechaVenta + 'T12:00:00').toLocaleDateString(idiomaActual === 'en' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : new Date().toLocaleDateString();
+                
+                document.getElementById('cFecha').innerHTML = `<span class="underline">${fechaTexto}</span>`;
+                document.getElementById('cCompNombre').textContent = l.compradorNombre;
+                document.getElementById('cCompDir').textContent = l.compradorDireccion || '__________________________________________________________________';
+                document.getElementById('cCompIne').textContent = l.compradorIne || '________________________';
+                document.getElementById('cCompContacto').textContent = l.compradorTel || '________________________';
+                document.getElementById('cPrecio').textContent = `$${auto.precioVenta.toLocaleString('es-MX', {minimumFractionDigits: 2})} MXN`;
+                document.getElementById('cFormaPago').textContent = l.formaPago || '____________________________________________________________';
+                document.getElementById('firmComprador').textContent = l.compradorNombre;
+            } else {
+                document.getElementById('cFecha').textContent = idiomaActual === 'en' ? '_____ / _______________ / 202___' : '_____ de ______________________ de 202___';
+                document.getElementById('cCompNombre').textContent = '____________________________________________________________';
+                document.getElementById('cCompDir').textContent = '__________________________________________________________________';
+                document.getElementById('cCompIne').textContent = '__________________________';
+                document.getElementById('cCompContacto').textContent = '__________________________';
+                document.getElementById('cPrecio').textContent = '$____________________________';
+                document.getElementById('cFormaPago').textContent = '____________________________________________________________';
+                document.getElementById('firmComprador').textContent = '';
+            }
 
+            document.getElementById('modalContrato').classList.add('hidden');
             document.getElementById('modalContrato').classList.remove('hidden');
         }
 
         function cerrarContrato() { document.getElementById('modalContrato').classList.add('hidden'); }
 
+        function copiarResumenWhatsApp() {
+            if (!autoEnContratoActual) return;
+            const a = autoEnContratoActual;
+            const l = a.legal || {};
+            const esVendido = (a.estado === 'Vendido' || a.estado === 'Sold') && l.compradorNombre;
+
+            let textoWp = `🚗 *${nombreNegocio}* \n`;
+            textoWp += `Vehículo: *${a.nombre}* \n`;
+            if (a.vin) textoWp += `VIN: ${a.vin} \n`;
+            if (esVendido) {
+                textoWp += `Comprador: ${l.compradorNombre} \n`;
+                textoWp += `Precio Venta: $${a.precioVenta.toLocaleString('es-MX', {minimumFractionDigits: 2})} MXN \n`;
+                if (l.pendienteNota) textoWp += `⚠️ Nota/Pendiente: ${l.pendienteNota} \n`;
+            } else {
+                textoWp += `Estatus: Disponible en Piso \n`;
+            }
+            textoWp += `\n¡Gracias por su preferencia!`;
+
+            navigator.clipboard.writeText(textoWp).then(() => {
+                alert(idiomaActual === 'en' ? "Summary copied to clipboard!" : "¡Resumen copiado al portapapeles para enviar por WhatsApp!");
+            });
+        }
+
         function filtrarEstado(estado) {
             estadoFiltroActual = estado;
             ['Todos', 'Disponible', 'Vendido'].forEach(e => {
-                document.getElementById(`btnEstado${e}`).className = e === estado 
-                    ? "px-3 py-1.5 text-xs font-bold rounded-xl border bg-amber-500 text-slate-950 border-amber-500 transition"
-                    : "px-3 py-1.5 text-xs font-bold rounded-xl border bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800 transition";
+                const btn = document.getElementById(`btnEstado${e}`);
+                if (!btn) return;
+                btn.className = e === estado 
+                    ? "px-3 py-2 lg:py-1.5 text-xs font-bold rounded-xl border bg-amber-500 text-slate-950 border-amber-500 transition"
+                    : "px-3 py-2 lg:py-1.5 text-xs font-bold rounded-xl border bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800 transition";
             });
             render();
         }
@@ -618,15 +1065,15 @@
         function calcularDiasPiso(fechaCompra, fechaVenta, estado) {
             if (!fechaCompra) return 0;
             const inicio = new Date(fechaCompra);
-            const fin = estado === 'Vendido' && fechaVenta ? new Date(fechaVenta) : new Date();
+            const fin = (estado === 'Vendido' || estado === 'Sold') && fechaVenta ? new Date(fechaVenta) : new Date();
             const dias = Math.floor((fin - inicio) / (1000 * 60 * 60 * 24));
             return dias < 0 ? 0 : dias;
         }
 
         function exportarDatos() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ autos, gastosFijos }, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ autos, gastosFijos, nombreNegocio }, null, 2));
             const a = document.createElement('a'); a.href = dataStr;
-            a.download = `seminuevos_beltran_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `respaldo_negocio_${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a); a.click(); a.remove();
         }
 
@@ -644,14 +1091,20 @@
                     } else if (data && typeof data === 'object') {
                         autos = Array.isArray(data.autos) ? data.autos : [];
                         gastosFijos = Array.isArray(data.gastosFijos) ? data.gastosFijos : [];
+                        if (data.nombreNegocio) {
+                            nombreNegocio = data.nombreNegocio;
+                            localStorage.setItem('nombre_negocio_db', nombreNegocio);
+                            document.getElementById('nombreNegocioTxt').textContent = nombreNegocio;
+                            document.getElementById('pageTitle').textContent = `${nombreNegocio} - Control y Gestión`;
+                        }
                     } else {
                         throw new Error("Estructura no válida");
                     }
 
                     guardarDatos();
-                    alert("¡Datos restaurados con éxito!");
+                    alert(idiomaActual === 'en' ? "Data successfully restored!" : "¡Datos restaurados con éxito!");
                 } catch (err) {
-                    alert("El archivo seleccionado no es un respaldo válido de JSON.");
+                    alert(idiomaActual === 'en' ? "The selected file is not a valid JSON backup." : "El archivo seleccionado no es un respaldo válido de JSON.");
                 } finally {
                     event.target.value = '';
                 }
@@ -663,6 +1116,7 @@
             const lista = document.getElementById('listaAutos');
             const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
             const sortVal = document.getElementById('sortSelect').value;
+            const mesVal = document.getElementById('filtroMes').value;
             
             const fragment = document.createDocumentFragment();
 
@@ -670,12 +1124,27 @@
             const totalGastosFijos = gastosFijos.reduce((s, g) => s + g.monto, 0);
 
             let autosFiltrados = autos.filter(auto => {
-                const coincideEstado = estadoFiltroActual === 'Todos' || auto.estado === estadoFiltroActual;
+                let coincideEstado = false;
+                if (estadoFiltroActual === 'Todos') {
+                    coincideEstado = true;
+                } else if (estadoFiltroActual === 'Disponible') {
+                    coincideEstado = auto.estado === 'Disponible' || auto.estado === 'Available';
+                } else if (estadoFiltroActual === 'Vendido') {
+                    coincideEstado = auto.estado === 'Vendido' || auto.estado === 'Sold';
+                }
+
                 const coincideBusqueda = auto.nombre.toLowerCase().includes(searchVal) || 
                     (auto.vin && auto.vin.toLowerCase().includes(searchVal)) ||
                     (auto.vendedorInfo && auto.vendedorInfo.toLowerCase().includes(searchVal)) ||
                     (auto.compradorInfo && auto.compradorInfo.toLowerCase().includes(searchVal));
-                return coincideEstado && coincideBusqueda;
+
+                let coincideMes = true;
+                if (mesVal !== 'todos') {
+                    const fechaRef = (auto.estado === 'Vendido' || auto.estado === 'Sold') ? (auto.fechaVenta || auto.fechaCompra) : auto.fechaCompra;
+                    coincideMes = fechaRef && fechaRef.startsWith(mesVal);
+                }
+
+                return coincideEstado && coincideBusqueda && coincideMes;
             });
 
             autosFiltrados.sort((a, b) => {
@@ -689,7 +1158,7 @@
                 const costoTotal = auto.precioCompra + totalGastos;
                 invTotal += costoTotal;
 
-                if (auto.estado === 'Vendido') {
+                if (auto.estado === 'Vendido' || auto.estado === 'Sold') {
                     venTotal += auto.precioVenta;
                     ganTotalBruta += (auto.precioVenta - costoTotal);
                     sumaDiasVendidos += calcularDiasPiso(auto.fechaCompra, auto.fechaVenta, auto.estado);
@@ -700,25 +1169,71 @@
             });
 
             if (autosFiltrados.length === 0) {
-                lista.innerHTML = `<div class="bg-slate-900/90 border border-slate-800 p-8 rounded-2xl text-center text-slate-500 text-xs"><i class="fa-solid fa-car text-3xl mb-2"></i><p>No hay vehículos registrados o encontrados.</p></div>`;
+                const msgVacio = idiomaActual === 'en' ? "No vehicles found or registered." : "No hay vehículos registrados o encontrados.";
+                lista.innerHTML = `<div class="bg-slate-900/90 border border-slate-800 p-8 rounded-2xl text-center text-slate-500 text-xs"><i class="fa-solid fa-car text-3xl mb-2"></i><p>${msgVacio}</p></div>`;
             } else {
                 lista.innerHTML = '';
                 autosFiltrados.forEach(auto => {
-                    if (!auto.docs) auto.docs = { factura: false, pedimento: false, tenencias: false, multas: false, bajaPlacas: false, placasActuales: false };
+                    if (!auto.docs) {
+                        auto.docs = idiomaActual === 'en' 
+                            ? { cleanTitle: false, salvageTitle: false, rebuiltTitle: false, pedimento: false }
+                            : { factura: false, pedimento: false, tenencias: false, multas: false, bajaPlacas: false, placasActuales: false };
+                    }
                     const totalGastos = auto.gastos.reduce((sum, g) => sum + g.monto, 0);
                     const costoTotal = auto.precioCompra + totalGastos;
-                    const ganancia = auto.estado === 'Vendido' ? auto.precioVenta - costoTotal : 0;
+                    const esVendido = auto.estado === 'Vendido' || auto.estado === 'Sold';
+                    const ganancia = esVendido ? auto.precioVenta - costoTotal : 0;
                     const diasEnPiso = calcularDiasPiso(auto.fechaCompra, auto.fechaVenta, auto.estado);
-                    const alertaTiempo = auto.estado === 'Disponible' && diasEnPiso >= 60;
+                    const alertaTiempo = !esVendido && diasEnPiso >= 60;
+                    const kilometrajeAuto = auto.vendedorKm || auto.legal?.km || 'N/A';
+                    const notaPendiente = auto.legal?.pendienteNota || '';
 
                     const card = document.createElement('div');
                     card.className = `bg-slate-900/90 border ${alertaTiempo ? 'border-rose-500/80 ring-1 ring-rose-500/30' : 'border-slate-800'} p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col lg:flex-row gap-4 w-full max-w-full overflow-hidden`;
 
+                    const txtEstancia = idiomaActual === 'en' ? 'In Stock' : 'Estancia';
+                    const txtDias = idiomaActual === 'en' ? 'days' : 'días';
+                    const txtCompraCard = idiomaActual === 'en' ? 'Purchase' : 'Compra';
+                    const txtGastosCard = idiomaActual === 'en' ? 'Extra Exp.' : 'Gastos Extra';
+                    const txtCostoCard = idiomaActual === 'en' ? 'Total Cost' : 'Costo Total';
+                    const txtGananciaCard = idiomaActual === 'en' ? 'Profit' : 'Ganancia';
+                    const txtPendiente = idiomaActual === 'en' ? 'Pending' : 'Pendiente';
+                    const txtDocs = idiomaActual === 'en' ? 'Title & Documentation Status' : 'Estatus de Documentación';
+                    const txtGastosAuto = idiomaActual === 'en' ? 'Vehicle Expenses' : 'Gastos del Vehículo';
+                    const txtSinGastos = idiomaActual === 'en' ? 'No additional expenses' : 'Sin gastos adicionales';
+                    const txtBtnAddGasto = idiomaActual === 'en' ? '+ Add Expense' : '+ Agregar Gasto';
+                    const txtCompradoA = idiomaActual === 'en' ? 'Purchased from:' : 'Compra a:';
+                    const txtVendidoA = idiomaActual === 'en' ? 'Sold to:' : 'Vendido a:';
+                    const txtBtnVender = idiomaActual === 'en' ? 'Sell' : 'Vender';
+                    const txtBtnReabrir = idiomaActual === 'en' ? 'Reopen' : 'Reabrir';
+                    const txtBtnEdit = idiomaActual === 'en' ? 'Edit' : 'Editar';
+                    const txtBtnContrato = idiomaActual === 'en' ? 'Bill of Sale' : 'Contrato';
+                    const txtBtnDel = idiomaActual === 'en' ? 'Delete' : 'Eliminar';
+
+                    let docsHtml = '';
+                    if (idiomaActual === 'en') {
+                        docsHtml = `
+                            <label onclick="toggleDoc(${auto.id}, 'cleanTitle')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.cleanTitle ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.cleanTitle ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Clean Title</label>
+                            <label onclick="toggleDoc(${auto.id}, 'salvageTitle')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.salvageTitle ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.salvageTitle ? 'fa-square-check text-rose-400' : 'fa-square'}"></i> Salvage</label>
+                            <label onclick="toggleDoc(${auto.id}, 'rebuiltTitle')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.rebuiltTitle ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.rebuiltTitle ? 'fa-square-check text-amber-400' : 'fa-square'}"></i> Rebuilt</label>
+                            <label onclick="toggleDoc(${auto.id}, 'pedimento')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.pedimento ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.pedimento ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Import Doc</label>
+                        `;
+                    } else {
+                        docsHtml = `
+                            <label onclick="toggleDoc(${auto.id}, 'factura')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.factura ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.factura ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Factura</label>
+                            <label onclick="toggleDoc(${auto.id}, 'pedimento')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.pedimento ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.pedimento ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Pedimento</label>
+                            <label onclick="toggleDoc(${auto.id}, 'tenencias')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.tenencias ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.tenencias ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Tenencias</label>
+                            <label onclick="toggleDoc(${auto.id}, 'multas')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.multas ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.multas ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Sin Multas</label>
+                            <label onclick="toggleDoc(${auto.id}, 'bajaPlacas')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.bajaPlacas ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.bajaPlacas ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Baja Placas</label>
+                            <label onclick="toggleDoc(${auto.id}, 'placasActuales')" class="cursor-pointer select-none px-2.5 py-1 sm:py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.placasActuales ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.placasActuales ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Placas Act.</label>
+                        `;
+                    }
+
                     card.innerHTML = `
-                        <div class="w-full lg:w-40 h-36 bg-slate-950 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-slate-800 relative">
+                        <div class="w-full lg:w-40 h-44 sm:h-36 bg-slate-950 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-slate-800 relative">
                             ${auto.imagen ? `<img src="${auto.imagen}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-car text-3xl text-slate-700"></i>`}
-                            <span class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded-full ${auto.estado === 'Vendido' ? 'bg-emerald-500 text-slate-950' : 'bg-amber-400 text-slate-950'}">${auto.estado}</span>
-                            <button onclick="cambiarFotoAuto(${auto.id})" class="absolute bottom-2 right-2 bg-slate-900/80 hover:bg-slate-900 text-white p-1.5 rounded-lg text-xs border border-slate-700" title="Cambiar foto"><i class="fa-solid fa-camera"></i></button>
+                            <span class="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded-full ${esVendido ? 'bg-emerald-500 text-slate-950' : 'bg-amber-400 text-slate-950'}">${auto.estado}</span>
+                            <button onclick="cambiarFotoAuto(${auto.id})" class="absolute bottom-2 right-2 bg-slate-900/90 hover:bg-slate-900 text-white p-2 sm:p-1.5 rounded-lg text-xs border border-slate-700" title="Cambiar foto"><i class="fa-solid fa-camera"></i></button>
                         </div>
 
                         <div class="flex-1 space-y-3 min-w-0">
@@ -726,69 +1241,67 @@
                                 <div class="min-w-0 flex-1">
                                     <h3 class="text-sm sm:text-base font-black text-slate-100 flex flex-wrap items-center gap-2 break-words">
                                         <span>${auto.nombre}</span>
-                                        ${alertaTiempo ? '<span class="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-clock"></i> +60 Días</span>' : ''}
+                                        ${alertaTiempo ? `<span class="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-clock"></i> +60 ${txtDias}</span>` : ''}
                                     </h3>
-                                    <p class="text-xs text-slate-400 mt-0.5 break-words">${auto.vin ? `VIN: <span class="font-mono text-slate-300">${auto.vin}</span> | ` : ''}Compra: <span class="text-slate-300">${auto.fechaCompra || 'N/A'}</span></p>
+                                    <p class="text-xs text-slate-400 mt-0.5 break-words">${auto.vin ? `VIN: <span class="font-mono text-slate-300">${auto.vin}</span> | ` : ''}Km: <span class="text-slate-300 font-semibold">${kilometrajeAuto}</span> | ${txtCompraCard}: <span class="text-slate-300">${auto.fechaCompra || 'N/A'}</span></p>
                                 </div>
                                 <div class="text-right bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 flex-shrink-0">
-                                    <span class="text-[9px] text-slate-400 font-bold uppercase block">Estancia</span>
-                                    <span class="text-xs font-bold ${alertaTiempo ? 'text-rose-400' : 'text-slate-200'}">${diasEnPiso} días</span>
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase block">${txtEstancia}</span>
+                                    <span class="text-xs font-bold ${alertaTiempo ? 'text-rose-400' : 'text-slate-200'}">${diasEnPiso} ${txtDias}</span>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                                <div><span class="text-slate-400 block text-[9px]">Compra</span><span class="font-bold text-slate-200">$${auto.precioCompra.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
-                                <div><span class="text-slate-400 block text-[9px]">Gastos Extra</span><span class="font-bold text-rose-400">$${totalGastos.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
-                                <div><span class="text-slate-400 block text-[9px]">Costo Total</span><span class="font-bold text-white">$${costoTotal.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
-                                <div><span class="text-slate-400 block text-[9px]">Ganancia</span><span class="font-bold ${ganancia >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${auto.estado === 'Vendido' ? '$' + ganancia.toLocaleString('es-MX', {minimumFractionDigits: 2}) : 'Pendiente'}</span></div>
+                                <div><span class="text-slate-400 block text-[9px]">${txtCompraCard}</span><span class="font-bold text-slate-200 break-all">$${auto.precioCompra.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
+                                <div><span class="text-slate-400 block text-[9px]">${txtGastosCard}</span><span class="font-bold text-rose-400 break-all">$${totalGastos.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
+                                <div><span class="text-slate-400 block text-[9px]">${txtCostoCard}</span><span class="font-bold text-white break-all">$${costoTotal.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span></div>
+                                <div><span class="text-slate-400 block text-[9px]">${txtGananciaCard}</span><span class="font-bold ${ganancia >= 0 ? 'text-emerald-400' : 'text-rose-400'} break-all">${esVendido ? '$' + ganancia.toLocaleString('es-MX', {minimumFractionDigits: 2}) : txtPendiente}</span></div>
                             </div>
 
                             <div class="space-y-1">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase">Documentación</span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">${txtDocs}</span>
                                 <div class="flex flex-wrap gap-1.5 text-xs">
-                                    <label onclick="toggleDoc(${auto.id}, 'factura')" class="cursor-pointer select-none px-2 py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.factura ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.factura ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Factura</label>
-                                    <label onclick="toggleDoc(${auto.id}, 'pedimento')" class="cursor-pointer select-none px-2 py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.pedimento ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.pedimento ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Pedimento</label>
-                                    <label onclick="toggleDoc(${auto.id}, 'tenencias')" class="cursor-pointer select-none px-2 py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.tenencias ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.tenencias ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Tenencias</label>
-                                    <label onclick="toggleDoc(${auto.id}, 'multas')" class="cursor-pointer select-none px-2 py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.multas ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.multas ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Sin Multas</label>
-                                    <label onclick="toggleDoc(${auto.id}, 'bajaPlacas')" class="cursor-pointer select-none px-2 py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.bajaPlacas ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.bajaPlacas ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Baja Placas</label>
-                                    <label onclick="toggleDoc(${auto.id}, 'placasActuales')" class="cursor-pointer select-none px-2 py-0.5 rounded-lg border text-[10px] font-medium ${auto.docs?.placasActuales ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-950 border-slate-800 text-slate-500'}"><i class="fa-solid ${auto.docs?.placasActuales ? 'fa-square-check text-emerald-400' : 'fa-square'}"></i> Placas Act.</label>
+                                    ${docsHtml}
                                 </div>
                             </div>
 
                             <div>
                                 <div class="flex justify-between items-center mb-1">
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Gastos del Vehículo</span>
-                                    <button onclick="agregarGasto(${auto.id})" class="text-[10px] text-amber-400 hover:text-amber-300 font-bold">+ Agregar Gasto</button>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">${txtGastosAuto}</span>
+                                    <button onclick="agregarGasto(${auto.id})" class="text-[10px] text-amber-400 hover:text-amber-300 font-bold p-1">${txtBtnAddGasto}</button>
                                 </div>
                                 <div class="flex flex-wrap gap-1.5">
-                                    ${auto.gastos.length === 0 ? '<span class="text-xs text-slate-500 italic">Sin gastos adicionales</span>' : ''}
+                                    ${auto.gastos.length === 0 ? `<span class="text-xs text-slate-500 italic">${txtSinGastos}</span>` : ''}
                                     ${auto.gastos.map((g, index) => `
-                                        <span class="inline-flex items-center gap-1 bg-slate-950 text-slate-300 text-[11px] px-2 py-0.5 rounded-lg border border-slate-800">
+                                        <span class="inline-flex items-center gap-1 bg-slate-950 text-slate-300 text-[11px] px-2 py-1 rounded-lg border border-slate-800">
                                             <span>${g.concepto}:</span> <strong>$${g.monto.toLocaleString('es-MX')}</strong>
-                                            <button onclick="eliminarGasto(${auto.id}, ${index})" class="text-rose-400 font-bold ml-1">×</button>
+                                            <button onclick="eliminarGasto(${auto.id}, ${index})" class="text-rose-400 font-bold ml-1 px-1">×</button>
                                         </span>
                                     `).join('')}
                                 </div>
                             </div>
 
-                            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-800/60 flex flex-wrap gap-3">
-                                <span><i class="fa-solid fa-user-tag text-slate-500"></i> Compra a: <strong class="text-slate-300">${auto.vendedorInfo || 'N/A'}</strong></span>
-                                ${auto.estado === 'Vendido' ? `<span><i class="fa-solid fa-user-check text-emerald-400"></i> Vendido a: <strong class="text-slate-300">${auto.compradorInfo || 'N/A'}</strong></span>` : ''}
+                            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-800/60 flex flex-wrap justify-between items-center gap-3">
+                                <div class="min-w-0 flex-1 break-words">
+                                    <span><i class="fa-solid fa-user-tag text-slate-500"></i> ${txtCompradoA} <strong class="text-slate-300">${auto.vendedorInfo || 'N/A'}</strong></span>
+                                    ${esVendido ? `<span class="ml-3"><i class="fa-solid fa-user-check text-emerald-400"></i> ${txtVendidoA} <strong class="text-slate-300">${auto.compradorInfo || 'N/A'}</strong></span>` : ''}
+                                </div>
+                                ${notaPendiente ? `<div class="text-amber-400 bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/30 text-[10px] font-semibold"><i class="fa-solid fa-triangle-exclamation"></i> ${notaPendiente}</div>` : ''}
                             </div>
                         </div>
 
                         <div class="flex flex-row lg:flex-col justify-end gap-2 border-t lg:border-t-0 lg:border-l border-slate-800 pt-3 lg:pt-0 lg:pl-4 min-w-[140px] flex-shrink-0">
-                            ${auto.estado === 'Disponible' 
-                                ? `<button onclick="abrirModalVenta(${auto.id})" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 px-3 rounded-xl transition text-center shadow-sm">Vender</button>`
-                                : `<button onclick="marcarDisponible(${auto.id})" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-2 px-3 rounded-xl transition text-center shadow-sm">Reabrir</button>`
+                            ${!esVendido 
+                                ? `<button onclick="abrirModalVenta(${auto.id})" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition text-center shadow-sm">${txtBtnVender}</button>`
+                                : `<button onclick="marcarDisponible(${auto.id})" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl transition text-center shadow-sm">${txtBtnReabrir}</button>`
                             }
-                            <button onclick="abrirModalEditar(${auto.id})" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold py-2 px-3 rounded-xl transition text-center flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-pen-to-square"></i> Editar
+                            <button onclick="abrirModalEditar(${auto.id})" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold py-2.5 px-3 rounded-xl transition text-center flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-pen-to-square"></i> ${txtBtnEdit}
                             </button>
-                            <button onclick="generarContrato(${auto.id})" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2 px-3 rounded-xl transition text-center flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-file-contract text-amber-400"></i> Contrato
+                            <button onclick="generarContrato(${auto.id})" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2.5 px-3 rounded-xl transition text-center flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-file-contract text-amber-400"></i> ${txtBtnContrato}
                             </button>
-                            <button onclick="eliminarAuto(${auto.id})" class="w-full bg-slate-950 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 text-xs font-bold py-2 px-3 rounded-xl transition text-center">Eliminar</button>
+                            <button onclick="eliminarAuto(${auto.id})" class="w-full bg-slate-950 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 text-xs font-bold py-2.5 px-3 rounded-xl transition text-center">${txtBtnDel}</button>
                         </div>
                     `;
 
@@ -801,8 +1314,8 @@
             document.getElementById('ventasTotales').textContent = `$${venTotal.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
             document.getElementById('gastosFijosTotal').textContent = `$${totalGastosFijos.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
             document.getElementById('gananciaTotal').textContent = `$${(ganTotalBruta - totalGastosFijos).toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
-            document.getElementById('autosInventario').textContent = `${disponiblesCount} autos`;
-            document.getElementById('promedioDias').textContent = `Prom. ${totalVendidosCount > 0 ? Math.round(sumaDiasVendidos / totalVendidosCount) : 0} días / venta`;
+            document.getElementById('autosInventario').textContent = `${disponiblesCount} ${idiomaActual === 'en' ? 'cars' : 'autos'}`;
+            document.getElementById('promedioDias').textContent = `${idiomaActual === 'en' ? 'Avg.' : 'Prom.'} ${totalVendidosCount > 0 ? Math.round(sumaDiasVendidos / totalVendidosCount) : 0} ${idiomaActual === 'en' ? 'days / sale' : 'días / venta'}`;
         }
 
         render();
